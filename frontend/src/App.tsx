@@ -12,14 +12,14 @@ function App() {
             const response = await axios.post("/api/", promptToSubmit)
 
         } catch (e) {
-
+            console.log(e);
         }
     }
     return (
         <div className="flex min-h-screen w-screen flex-col items-center justify-center">
             <Routes>
                 <Route path="/" element={<Home/>}/>
-                <Route path="/play" element={<Game submitPrompt={}/>}/>
+                <Route path="/play" element={<Game submitPrompt={submitPrompt}/>}/>
             </Routes>
         </div>
     )
