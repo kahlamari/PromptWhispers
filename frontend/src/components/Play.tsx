@@ -25,7 +25,7 @@ export default function Play() {
         event.preventDefault()
 
         const promptToSubmit: PromptCreate = {
-            prompt: prompt
+            prompt
         }
 
         submitPrompt(promptToSubmit)

@@ -5,7 +5,7 @@ import in.kahl.promptwhispers.model.Prompt;
 public record PromptCreate(
         String prompt
 ) {
-    public Prompt withIdAndCreatedAt() {
+    public Prompt makeIntoPrompt() {
         return new Prompt(prompt());
     }
 }

@@ -24,8 +24,8 @@ public class GameService {
         return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
-    public Game submitPrompt(String gameId, PromptCreate prompt) {
-        Prompt newPrompt = prompt.withIdAndCreatedAt();
+    public Game submitPrompt(String gameId, PromptCreate promptCreate) {
+        Prompt newPrompt = promptCreate.makeIntoPrompt();
 
         Game game = getGameById(gameId);
         Game gameWithPrompt = game.withStep(newPrompt);
