@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,7 +25,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void createGameTest_whenCalled_thenReturnGame() throws Exception {
         // ACT
-        mockMvc.perform(get("/api/play/start")
+        mockMvc.perform(post("/api/play/start")
                         .contentType(MediaType.APPLICATION_JSON))
 
                 // ASSERT
@@ -41,7 +40,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void getGameTest_whenGameExists_thenReturnGame() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(get("/api/play/start")
+        String saveResult = mockMvc.perform(post("/api/play/start")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
@@ -63,7 +62,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void submitPromptTest_whenPromptSubmitted_thenPromptSaved() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(get("/api/play/start")
+        String saveResult = mockMvc.perform(post("/api/play/start")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
