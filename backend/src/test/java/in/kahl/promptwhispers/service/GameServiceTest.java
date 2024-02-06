@@ -2,11 +2,12 @@ package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Prompt;
-import in.kahl.promptwhispers.model.PromptCreate;
+import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.time.Instant;
@@ -29,25 +30,26 @@ class GameServiceTest {
     void createGameTest_whenGameCreationRequested_thenNewGameReturned() {
         // ARRANGE
         Instant time = Instant.now();
-        Mockito.mockStatic(Instant.class);
-        Mockito.when(Instant.now()).thenReturn(time);
+        UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-        UUID mockedUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        Mockito.mockStatic(UUID.class);
-        when(UUID.randomUUID()).thenReturn(mockedUUID);
+        try (MockedStatic<Instant> mockedInstant = mockStatic(Instant.class);
+             MockedStatic<UUID> mockedUUID = Mockito.mockStatic(UUID.class)) {
+            mockedInstant.when(Instant::now).thenReturn(time);
+            mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
-        Game expected = new Game("00000000-0000-0000-0000-000000000000",
-                Collections.emptyMap(), time, false);
+            Game expected = new Game("00000000-0000-0000-0000-000000000000",
+                    Collections.emptyMap(), time, false);
 
-        when(gameRepo.save(expected)).thenReturn(expected);
+            when(gameRepo.save(expected)).thenReturn(expected);
 
-        // ACT
-        Game actual = serviceUnderTest.createGame();
+            // ACT
+            Game actual = serviceUnderTest.createGame();
 
-        // ASSERT
-        assertEquals(expected, actual);
-        verify(gameRepo).save(expected);
-        verifyNoMoreInteractions(gameRepo);
+            // ASSERT
+            assertEquals(expected, actual);
+            verify(gameRepo).save(expected);
+            verifyNoMoreInteractions(gameRepo);
+        }
     }
 
     @Test
@@ -83,33 +85,35 @@ class GameServiceTest {
     void submitPromptTest_when1stPromptSubmitted_thenGameContainsPrompt() {
         // ARRANGE
         Instant time = Instant.now();
-        Mockito.mockStatic(Instant.class);
-        Mockito.when(Instant.now()).thenReturn(time);
+        UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-        UUID mockedUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        Mockito.mockStatic(UUID.class);
-        when(UUID.randomUUID()).thenReturn(mockedUUID);
+        try (MockedStatic<Instant> mockedInstant = mockStatic(Instant.class);
+             MockedStatic<UUID> mockedUUID = Mockito.mockStatic(UUID.class)) {
+            mockedInstant.when(Instant::now).thenReturn(time);
+            mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
-        String gameId = "1";
-        Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyMap(), Instant.now(), false));
-        when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
+            String gameId = "1";
+            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyMap(), time, false));
+            when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
-        String promptInput = "Sheep jumps over hedge";
+            String promptInput = "Sheep jumps over hedge";
 
-        Game expectedGameWithPrompt = new Game(gameId,
-                Map.of(0, new Prompt(promptInput)),
-                Instant.now(), false);
-        when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
+            Game expectedGameWithPrompt = new Game(gameId,
+                    Map.of(0, new Prompt(promptInput)),
+                    time, false);
+            when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
 
-        PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
+            PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
-        // ACT
-        Game actualGameWithPrompt = serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+            // ACT
+            Game actualGameWithPrompt = serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
 
-        // ASSERT
-        assertEquals(expectedGameWithPrompt, actualGameWithPrompt);
-        verify(gameRepo).findById(gameId);
-        verify(gameRepo).save(expectedGameWithPrompt);
-        verifyNoMoreInteractions(gameRepo);
+            // ASSERT
+            assertEquals(expectedGameWithPrompt, actualGameWithPrompt);
+            verify(gameRepo).findById(gameId);
+            verify(gameRepo).save(expectedGameWithPrompt);
+            verifyNoMoreInteractions(gameRepo);
+        }
+
     }
 }

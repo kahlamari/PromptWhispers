@@ -2,7 +2,7 @@ package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Prompt;
-import in.kahl.promptwhispers.model.PromptCreate;
+import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.stereotype.Service;
 

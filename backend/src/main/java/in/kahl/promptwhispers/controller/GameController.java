@@ -1,7 +1,7 @@
 package in.kahl.promptwhispers.controller;
 
 import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.PromptCreate;
+import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
