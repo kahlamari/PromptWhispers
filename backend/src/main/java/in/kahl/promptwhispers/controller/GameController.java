@@ -15,7 +15,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("start")
+    @PostMapping("start")
     @ResponseStatus(HttpStatus.CREATED)
     public Game createGame() {
         return gameService.createGame();
