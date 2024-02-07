@@ -21,8 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.util.Map;
+import java.time.Instant;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -97,12 +101,26 @@ public class DalleIntegrationTest {
         when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
-        mockMvc.perform(post("/api/play/" + gameId + "/generateImage")
+        String resultJSON = mockMvc.perform(post("/api/play/" + gameId + "/generateImage")
                         .contentType(MediaType.APPLICATION_JSON))
+                // ASSERT
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.steps").isMap())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)));
+                .andExpect(jsonPath("$.isFinished", is(false)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String gameIdActual = JsonPath.parse(resultJSON).read("$.id");
+        assertEquals(gameId, gameIdActual);
+
+        Map<String, Object> mapActual = JsonPath.parse(resultJSON).read("$.steps");
+        assertEquals(2, mapActual.size());
+        assertTrue(mapActual.get("1").toString().contains("imageUrl=https://example.com/image.png"));
+
+        Instant instantActual = Instant.parse(JsonPath.parse(resultJSON).read("$.createdAt"));
+        assertTrue(instantActual.isBefore(Instant.now()));
     }
 }

@@ -150,6 +150,11 @@ class GameServiceTest {
 
             // ASSERT
             assertEquals(gameWithImageUrl, gameActual);
+            verify(gameRepo).findById(gameId);
+            verify(gameRepo).save(gameWithImageUrl);
+            verifyNoMoreInteractions(gameRepo);
+            verify(dalleService).getGeneratedImageUrl(promptInput);
+            verifyNoMoreInteractions(dalleService);
         }
     }
 }

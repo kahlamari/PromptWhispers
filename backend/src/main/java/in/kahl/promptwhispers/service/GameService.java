@@ -47,12 +47,12 @@ public class GameService {
             throw new NoSuchElementException();
         }
 
-        Integer i = steps.size() - 1;
+        Integer maxStepIndex = steps.size() - 1;
 
-        Renderable step = steps.get(i);
+        Renderable step = steps.get(maxStepIndex);
 
-        if (step instanceof Prompt) {
-            return (Prompt) steps.get(i);
+        if (step instanceof Prompt prompt) {
+            return prompt;
         }
         throw new NoSuchElementException();
     }
