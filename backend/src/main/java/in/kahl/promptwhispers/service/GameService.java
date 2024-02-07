@@ -8,7 +8,7 @@ import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -42,14 +42,12 @@ public class GameService {
         return gameRepo.save(gameWithPrompt);
     }
 
-    private static Prompt getMostRecentPrompt(Map<Integer, Renderable> steps) {
+    private static Prompt getMostRecentPrompt(List<Renderable> steps) {
         if (steps.isEmpty()) {
             throw new NoSuchElementException();
         }
 
-        Integer maxStepIndex = steps.size() - 1;
-
-        Renderable step = steps.get(maxStepIndex);
+        Renderable step = steps.getLast();
 
         if (step instanceof Prompt prompt) {
             return prompt;

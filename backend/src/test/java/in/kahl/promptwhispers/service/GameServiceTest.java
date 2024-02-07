@@ -41,7 +41,7 @@ class GameServiceTest {
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
             Game expected = new Game("00000000-0000-0000-0000-000000000000",
-                    Collections.emptyMap(), time, false);
+                    Collections.emptyList(), time, false);
 
             when(gameRepo.save(expected)).thenReturn(expected);
 
@@ -59,7 +59,7 @@ class GameServiceTest {
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
         String id = "1";
-        Optional<Game> expectedGame = Optional.of(new Game(id, Collections.emptyMap(), Instant.now(), false));
+        Optional<Game> expectedGame = Optional.of(new Game(id, Collections.emptyList(), Instant.now(), false));
         when(gameRepo.findById(id)).thenReturn(expectedGame);
 
         // ACT
@@ -96,13 +96,13 @@ class GameServiceTest {
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
             String gameId = "1";
-            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyMap(), time, false));
+            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyList(), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
             String promptInput = "Sheep jumps over hedge";
 
             Game expectedGameWithPrompt = new Game(gameId,
-                    Map.of(0, new Prompt(promptInput)),
+                    List.of(new Prompt(promptInput)),
                     time, false);
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
 
@@ -133,7 +133,7 @@ class GameServiceTest {
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
             Prompt prompt = new Prompt(promptInput);
-            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, Map.of(0, prompt), time, false));
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, List.of(prompt), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
             String imageUrl = "https://example.com/image.png";
@@ -142,7 +142,7 @@ class GameServiceTest {
 
             GeneratedImage generatedImage = new GeneratedImage(imageUrl);
             Game gameWithImageUrl = new Game(gameId,
-                    Map.of(0, prompt, 1, generatedImage), time, false);
+                    List.of(prompt, generatedImage), time, false);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
             // ACT
