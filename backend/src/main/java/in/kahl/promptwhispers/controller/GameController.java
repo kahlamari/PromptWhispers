@@ -30,4 +30,10 @@ public class GameController {
     public Game submitPrompt(@PathVariable String gameId, @RequestBody PromptCreate prompt) {
         return gameService.submitPrompt(gameId, prompt);
     }
+
+    @PostMapping("{gameId}/generateImage")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Game generateImage(@PathVariable String gameId) {
+        return gameService.generateImage(gameId);
+    }
 }

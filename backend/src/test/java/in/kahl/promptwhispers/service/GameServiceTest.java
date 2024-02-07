@@ -1,6 +1,7 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.GeneratedImage;
 import in.kahl.promptwhispers.model.Prompt;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
@@ -19,11 +20,13 @@ import static org.mockito.Mockito.*;
 
 class GameServiceTest {
     private final GameRepo gameRepo = mock(GameRepo.class);
+
+    private final DalleService dalleService = mock(DalleService.class);
     private GameService serviceUnderTest;
 
     @BeforeEach
     void setUp() {
-        serviceUnderTest = new GameService(gameRepo);
+        serviceUnderTest = new GameService(gameRepo, dalleService);
     }
 
     @Test
@@ -114,6 +117,38 @@ class GameServiceTest {
             verify(gameRepo).save(expectedGameWithPrompt);
             verifyNoMoreInteractions(gameRepo);
         }
+    }
 
+    @Test
+    void generateImageTest_whenGameIdProvided_thenGenerateImage() {
+        // ARRANGE
+        Instant time = Instant.now();
+        UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+        try (MockedStatic<Instant> mockedInstant = mockStatic(Instant.class);
+             MockedStatic<UUID> mockedUUID = Mockito.mockStatic(UUID.class)) {
+            mockedInstant.when(Instant::now).thenReturn(time);
+            mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
+
+            String gameId = "1";
+            String promptInput = "Sheep jumps over hedge";
+            Prompt prompt = new Prompt(promptInput);
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, Map.of(0, prompt), time, false));
+            when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
+
+            String imageUrl = "https://example.com/image.png";
+            when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
+
+            GeneratedImage generatedImage = new GeneratedImage(imageUrl);
+            Game gameWithImageUrl = new Game(gameId,
+                    Map.of(0, prompt, 1, generatedImage), time, false);
+            when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
+            
+            // ACT
+            Game gameActual = serviceUnderTest.generateImage(gameId);
+
+            // ASSERT
+            assertEquals(gameWithImageUrl, gameActual);
+        }
     }
 }
