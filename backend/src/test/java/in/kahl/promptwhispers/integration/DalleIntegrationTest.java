@@ -1,5 +1,7 @@
 package in.kahl.promptwhispers.integration;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.Uploader;
 import com.jayway.jsonpath.JsonPath;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -17,12 +20,17 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
+import java.util.Map;
 import java.time.Instant;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,6 +41,9 @@ public class DalleIntegrationTest {
     private static MockWebServer mockWebServer;
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private Cloudinary cloudinary;
 
     @DynamicPropertySource
     public static void configureUrl(DynamicPropertyRegistry registry) {
@@ -82,6 +93,12 @@ public class DalleIntegrationTest {
                              ]
                         }
                         """));
+
+        String imageUrl = "https://example.com/image.png";
+        Map<String, Object> mockResponse = Map.of("secure_url", imageUrl);
+
+        when(cloudinary.uploader()).thenReturn(mock(Uploader.class));
+        when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
         String resultJSON = mockMvc.perform(post("/api/play/" + gameId + "/generateImage")

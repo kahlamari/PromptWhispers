@@ -20,13 +20,13 @@ import static org.mockito.Mockito.*;
 
 class GameServiceTest {
     private final GameRepo gameRepo = mock(GameRepo.class);
-
     private final DalleService dalleService = mock(DalleService.class);
+    private final CloudinaryService cloudinaryService = mock(CloudinaryService.class);
     private GameService serviceUnderTest;
 
     @BeforeEach
     void setUp() {
-        serviceUnderTest = new GameService(gameRepo, dalleService);
+        serviceUnderTest = new GameService(gameRepo, dalleService, cloudinaryService);
     }
 
     @Test
@@ -138,12 +138,13 @@ class GameServiceTest {
 
             String imageUrl = "https://example.com/image.png";
             when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
+            when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
             GeneratedImage generatedImage = new GeneratedImage(imageUrl);
             Game gameWithImageUrl = new Game(gameId,
                     Map.of(0, prompt, 1, generatedImage), time, false);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
-            
+
             // ACT
             Game gameActual = serviceUnderTest.generateImage(gameId);
 
