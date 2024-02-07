@@ -71,7 +71,7 @@ public class DalleIntegrationTest {
     @DirtiesContext
     void generateImageTest_whenRequested_thenReturnGeneratedImageUrl() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/play/start")
+        String saveResult = mockMvc.perform(post("/api/game/start")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
@@ -79,7 +79,7 @@ public class DalleIntegrationTest {
 
         Game game = objectMapper.readValue(saveResult, Game.class);
 
-        saveResult = mockMvc.perform(post("/api/play/" + game.id() + "/prompt")
+        saveResult = mockMvc.perform(post("/api/game/" + game.id() + "/prompt")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                            {"prompt": "Goat jumps over a hedge."}
@@ -110,7 +110,7 @@ public class DalleIntegrationTest {
         when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
-        String resultJSON = mockMvc.perform(post("/api/play/" + game.id() + "/generateImage")
+        String resultJSON = mockMvc.perform(post("/api/game/" + game.id() + "/generateImage")
                         .contentType(MediaType.APPLICATION_JSON))
                 // ASSERT
                 .andExpect(status().isCreated())
