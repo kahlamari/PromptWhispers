@@ -25,7 +25,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void createGameTest_whenCalled_thenReturnGame() throws Exception {
         // ACT
-        mockMvc.perform(post("/api/play/start")
+        mockMvc.perform(post("/api/game/start")
                         .contentType(MediaType.APPLICATION_JSON))
 
                 // ASSERT
@@ -40,7 +40,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void getGameTest_whenGameExists_thenReturnGame() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/play/start")
+        String saveResult = mockMvc.perform(post("/api/game/start")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
@@ -48,7 +48,7 @@ class GameIntegrationTest {
 
         String gameId = JsonPath.parse(saveResult).read("$.id");
         // ACT
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/play/" + gameId)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/game/" + gameId)
                         .contentType(MediaType.APPLICATION_JSON))
                 // ASSERT
                 .andExpect(status().isOk())
@@ -62,7 +62,7 @@ class GameIntegrationTest {
     @DirtiesContext
     void submitPromptTest_whenPromptSubmitted_thenPromptSaved() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/play/start")
+        String saveResult = mockMvc.perform(post("/api/game/start")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
@@ -71,7 +71,7 @@ class GameIntegrationTest {
         String gameId = JsonPath.parse(saveResult).read("$.id");
 
         // ACT
-        mockMvc.perform(post("/api/play/" + gameId + "/prompt")
+        mockMvc.perform(post("/api/game/" + gameId + "/prompt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                    {"prompt": "Goat jumps over a hedge."}

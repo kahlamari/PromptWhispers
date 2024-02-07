@@ -5,14 +5,14 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const navigate = useNavigate();
   const startGame = () => {
-    axios.post<Game>("/api/play/start").then((response) => {
+    axios.post<Game>("/api/game/start").then((response) => {
       navigate(`/play/${response.data.id}`);
     });
   };
 
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-      <h1 className="mt-10 pb-5 text-center text-3xl font-bold leading-9 tracking-tight text-gray-900">
+      <h1 className="mt-10 text-center text-3xl font-bold leading-9 tracking-tight text-gray-900 pb-5">
         Prompt Whispers
       </h1>
       <button

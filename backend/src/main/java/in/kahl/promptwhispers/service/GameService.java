@@ -1,14 +1,13 @@
 package in.kahl.promptwhispers.service;
 
-import in.kahl.promptwhispers.Renderable;
 import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.GeneratedImage;
-import in.kahl.promptwhispers.model.Prompt;
+import in.kahl.promptwhispers.model.Step;
+import in.kahl.promptwhispers.model.StepType;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -33,8 +32,21 @@ public class GameService {
         return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
+    private static Step getMostRecentPrompt(List<Step> steps) {
+        if (steps.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
+        Step step = steps.getLast();
+
+        if (step.type().equals(StepType.PROMPT)) {
+            return step;
+        }
+        throw new NoSuchElementException();
+    }
+
     public Game submitPrompt(String gameId, PromptCreate promptCreate) {
-        Prompt newPrompt = promptCreate.makeIntoPrompt();
+        Step newPrompt = promptCreate.makeIntoPrompt();
 
         Game game = getGameById(gameId);
         Game gameWithPrompt = game.withStep(newPrompt);
@@ -42,29 +54,14 @@ public class GameService {
         return gameRepo.save(gameWithPrompt);
     }
 
-    private static Prompt getMostRecentPrompt(Map<Integer, Renderable> steps) {
-        if (steps.isEmpty()) {
-            throw new NoSuchElementException();
-        }
-
-        Integer i = steps.size() - 1;
-
-        Renderable step = steps.get(i);
-
-        if (step instanceof Prompt) {
-            return (Prompt) steps.get(i);
-        }
-        throw new NoSuchElementException();
-    }
-
     public Game generateImage(String gameId) {
         Game game = getGameById(gameId);
 
-        Prompt prompt = getMostRecentPrompt(game.steps());
+        Step prompt = getMostRecentPrompt(game.steps());
 
-        String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.prompt());
+        String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
-        GeneratedImage generatedImage = new GeneratedImage(imageUrl);
+        Step generatedImage = new Step(StepType.IMAGE, imageUrl);
         Game gameWithImage = game.withStep(generatedImage);
 
         return gameRepo.save(gameWithImage);
