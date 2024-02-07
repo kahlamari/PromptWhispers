@@ -1,6 +1,5 @@
 package in.kahl.promptwhispers.model;
 
-import in.kahl.promptwhispers.Renderable;
 import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
@@ -12,7 +11,7 @@ import java.util.UUID;
 public record Game(
         @Id
         String id,
-        List<Renderable> steps,
+        List<Step> steps,
         Instant createdAt,
         Boolean isFinished
 ) {
@@ -20,8 +19,8 @@ public record Game(
         this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now(), false);
     }
 
-    public Game withStep(Renderable step) {
-        List<Renderable> stepList = new LinkedList<>(steps());
+    public Game withStep(Step step) {
+        List<Step> stepList = new LinkedList<>(steps());
         stepList.addLast(step);
 
         return new Game(id(), stepList, createdAt(), isFinished());

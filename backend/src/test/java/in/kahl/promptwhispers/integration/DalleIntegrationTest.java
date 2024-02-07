@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.Step;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -21,9 +22,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -111,16 +115,18 @@ public class DalleIntegrationTest {
                 // ASSERT
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.steps").isMap())
+                .andExpect(jsonPath("$.steps").isNotEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.isFinished", is(false)))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        //Game gameActual = objectMapper.readValue(resultJSON, Game.class);
+        Game gameActual = objectMapper.readValue(resultJSON, Game.class);
+        Step imageStep = gameActual.steps().getLast();
 
-        //assertEquals(game.id(), gameActual.id());
-        //assertEquals(game.steps().get(1).render(), gameActual.steps().get(1).render());
+        assertEquals(game.id(), gameActual.id());
+        assertEquals(imageUrl, imageStep.content());
+        assertTrue(Instant.now().minusSeconds(10L).isBefore(imageStep.createdAt()));
     }
 }
