@@ -31,9 +31,6 @@ public class DalleService {
 
 
         if (response == null) {
-            /*
-             * TODO: Upload default image to handle null-case.
-             */
             return "https://image.png";
         }
 
