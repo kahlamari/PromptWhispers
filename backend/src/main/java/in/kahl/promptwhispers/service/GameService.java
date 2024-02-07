@@ -1,19 +1,25 @@
 package in.kahl.promptwhispers.service;
 
+import in.kahl.promptwhispers.Renderable;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.GeneratedImage;
 import in.kahl.promptwhispers.model.Prompt;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
 public class GameService {
     private final GameRepo gameRepo;
 
-    public GameService(GameRepo gameRepo) {
+    private final DalleService dalleService;
+
+    public GameService(GameRepo gameRepo, DalleService dalleService) {
         this.gameRepo = gameRepo;
+        this.dalleService = dalleService;
     }
 
     public Game createGame() {
@@ -31,5 +37,32 @@ public class GameService {
         Game gameWithPrompt = game.withStep(newPrompt);
 
         return gameRepo.save(gameWithPrompt);
+    }
+
+    private static Prompt getMostRecentPrompt(Map<Integer, Renderable> steps) {
+        if (steps.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
+        Integer maxStepIndex = steps.size() - 1;
+
+        Renderable step = steps.get(maxStepIndex);
+
+        if (step instanceof Prompt prompt) {
+            return prompt;
+        }
+        throw new NoSuchElementException();
+    }
+
+    public Game generateImage(String gameId) {
+        Game game = getGameById(gameId);
+
+        Prompt prompt = getMostRecentPrompt(game.steps());
+
+        String imageUrl = dalleService.getGeneratedImageUrl(prompt.prompt());
+        GeneratedImage generatedImage = new GeneratedImage(imageUrl);
+        Game gameWithImage = game.withStep(generatedImage);
+
+        return gameRepo.save(gameWithImage);
     }
 }
