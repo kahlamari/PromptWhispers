@@ -17,9 +17,12 @@ public class GameService {
 
     private final DalleService dalleService;
 
-    public GameService(GameRepo gameRepo, DalleService dalleService) {
+    private final CloudinaryService cloudinaryService;
+
+    public GameService(GameRepo gameRepo, DalleService dalleService, CloudinaryService cloudinaryService) {
         this.gameRepo = gameRepo;
         this.dalleService = dalleService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     public Game createGame() {
@@ -59,7 +62,8 @@ public class GameService {
 
         Prompt prompt = getMostRecentPrompt(game.steps());
 
-        String imageUrl = dalleService.getGeneratedImageUrl(prompt.prompt());
+        String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.prompt());
+        String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
         GeneratedImage generatedImage = new GeneratedImage(imageUrl);
         Game gameWithImage = game.withStep(generatedImage);
 
