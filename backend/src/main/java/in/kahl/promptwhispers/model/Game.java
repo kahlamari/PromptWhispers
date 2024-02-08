@@ -13,16 +13,25 @@ public record Game(
         String id,
         List<Step> steps,
         Instant createdAt,
-        Boolean isFinished
+        boolean isFinished
 ) {
     public Game() {
         this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now(), false);
     }
 
+    public static final int MAX_IMAGE_STEPS = 3;
+
+    public static boolean maxStepsReached(List<Step> steps) {
+        return steps.stream().filter(step -> step.type().equals(StepType.IMAGE)).count() >= MAX_IMAGE_STEPS;
+    }
+
     public Game withStep(Step step) {
+        if (isFinished()) {
+            throw new IllegalArgumentException("Game is finished. Not steps can be added.");
+        }
         List<Step> stepList = new LinkedList<>(steps());
         stepList.addLast(step);
 
-        return new Game(id(), stepList, createdAt(), isFinished());
+        return new Game(id(), stepList, createdAt(), maxStepsReached(stepList));
     }
 }
