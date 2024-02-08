@@ -4,7 +4,7 @@ import Play from "./components/Play.tsx";
 
 function App() {
   return (
-    <div className="flex min-h-screen w-screen flex-col items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-indigo-50">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/play/:gameId/" element={<Play />} />

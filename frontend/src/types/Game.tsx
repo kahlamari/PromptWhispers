@@ -1,6 +1,8 @@
+import { Step } from "./Step.tsx";
+
 export type Game = {
   id: string;
-  steps: { [key: number]: [value: string] };
+  steps: Step[];
   createdAt: Date;
   isFinished: boolean;
 };
