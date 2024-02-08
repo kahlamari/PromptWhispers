@@ -97,34 +97,44 @@ export default function Play() {
           src={getLastImage()?.content}
         />
       )}
-      <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
-        Enter your prompt!
-      </h1>
-      <form onSubmit={handleSubmit} className="flex">
-        <textarea
-          value={prompt}
-          onChange={onPromptChange}
-          rows={2}
-          placeholder="The potato king leads an uprising"
-          autoFocus={true}
-          disabled={inputDisabled}
-          className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
-        />
-        {!game?.isFinished && (
-          <button
-            type="submit"
-            disabled={inputDisabled}
-            className="w-auto justify-center rounded-2xl bg-indigo-600 px-10 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-75"
+      {!game?.isFinished && (
+        <>
+          <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
+            Enter your prompt!
+          </h1>
+          <form onSubmit={handleSubmit} className="flex">
+            <textarea
+              value={prompt}
+              onChange={onPromptChange}
+              rows={2}
+              placeholder="The potato king leads an uprising"
+              autoFocus={true}
+              disabled={inputDisabled}
+              className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
+            />
+            <button
+              type="submit"
+              disabled={inputDisabled}
+              className="w-auto justify-center rounded-2xl bg-indigo-600 px-10 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-75"
+            >
+              Done
+            </button>
+          </form>
+        </>
+      )}
+      {game?.isFinished && (
+        <div className="flex flex-col items-center">
+          <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
+            Game is completed!
+          </h1>
+          <Link
+            to="/"
+            className="w-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Done
-          </button>
-        )}
-        {game?.isFinished && (
-          <p>
-            Game is completed. Return to <Link to="/">Start!</Link>
-          </p>
-        )}
-      </form>
+            Return to Start!
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
