@@ -1,3 +1,3 @@
 export type PromptCreate = {
-    prompt: string;
+  prompt: string;
 };
