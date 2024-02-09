@@ -64,6 +64,19 @@ class UserServiceTest {
     }
 
     @Test
+    void getLoggedInUserTest_whenEmailNull_thenReturnNull() {
+        // ARRANGE
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(oAuth2User.getAttribute("email")).thenReturn(null);
+
+        // ACT
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+
+        // ASSERT
+        assertNull(userResponseActual);
+    }
+
+    @Test
     void getLoggedInUserTest_whenUserNotInDB_thenReturnNull() {
         // ARRANGE
         OAuth2User oAuth2User = mock(OAuth2User.class);
