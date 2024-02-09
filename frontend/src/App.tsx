@@ -10,7 +10,7 @@ function App() {
   const [user, setUser] = useState<User>(null);
 
   function getCurrentUser() {
-    axios.get<User>("/api/user").then((response) => {
+    axios.get<User>("/api/users").then((response) => {
       setUser(response.data);
       console.log(response.data);
       console.log(user);
