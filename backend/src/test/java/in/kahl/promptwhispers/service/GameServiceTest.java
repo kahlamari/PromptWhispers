@@ -157,4 +157,24 @@ class GameServiceTest {
             verifyNoMoreInteractions(dalleService);
         }
     }
+
+    @Test
+    void submitPrompt_whenGameFinished_thenThrowException() {
+        // ARRANGE
+        String gameId = "1";
+        Optional<Game> gameWith3Images = Optional.of(new Game(gameId,
+                Collections.emptyList(),
+                Instant.now(),
+                true));
+        when(gameRepo.findById(gameId)).thenReturn(gameWith3Images);
+
+        String promptInput = "Sheep jumps over hedge";
+        PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
+
+        // ACT
+        Executable executable = () -> serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+
+        // ASSERT
+        assertThrows(IllegalArgumentException.class, executable);
+    }
 }
