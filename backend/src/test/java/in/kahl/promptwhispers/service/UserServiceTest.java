@@ -42,9 +42,7 @@ class UserServiceTest {
 
     @Test
     void getLoggedInUserTest_whenProvideNull_thenReturnNull() {
-        // ARRANGE
-
-        // ACT
+        // ARRANGE & ACT
         UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(null);
 
         // ASSERT
@@ -59,7 +57,22 @@ class UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn(userEmail);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(null);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+
+        // ASSERT
+        assertNull(userResponseActual);
+    }
+
+    @Test
+    void getLoggedInUserTest_whenUserNotInDB_thenReturnNull() {
+        // ARRANGE
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        String userEmail = "user@example.com";
+        when(oAuth2User.getAttribute("email")).thenReturn(userEmail);
+        when(userRepo.getUserByEmail(userEmail)).thenReturn(null);
+
+        // ACT
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
 
         // ASSERT
         assertNull(userResponseActual);
