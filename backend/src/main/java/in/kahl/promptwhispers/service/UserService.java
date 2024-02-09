@@ -26,12 +26,14 @@ public class UserService {
             return null;
         }
 
-        boolean isReturningUser = userRepo.existsByEmail(userEmail.trim());
+        userEmail = userEmail.trim();
 
-        if (!isReturningUser) {
-            return new UserResponse(userRepo.save(new User(userEmail.trim(), true)));
+        User returningUser = userRepo.getUserByEmail(userEmail);
+
+        if (returningUser == null) {
+            return null;
         }
 
-        return new UserResponse(userRepo.getUserByEmail(userEmail));
+        return new UserResponse(returningUser);
     }
 }
