@@ -38,6 +38,10 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/user/").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/games/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/games/*/prompt").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/games/*/generateImage").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/games/*").authenticated()
                         .anyRequest().permitAll())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .oauth2Login(oauth2 -> {
@@ -49,7 +53,7 @@ public class SecurityConfig {
                             oauth2.defaultSuccessUrl("http://localhost:5173", true);
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new IllegalStateException(e);
                     }
                 })
                 .exceptionHandling(exceptionHandlingConfigurer ->

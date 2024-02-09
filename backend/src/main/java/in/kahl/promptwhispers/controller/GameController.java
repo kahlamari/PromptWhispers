@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/game")
+@RequestMapping("/api/games")
 public class GameController {
     private final GameService gameService;
 
