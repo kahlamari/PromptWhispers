@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${app.enviroment}")
+    @Value("${app.environment}")
     private String environment;
 
     @Bean
