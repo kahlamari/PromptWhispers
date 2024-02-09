@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { PromptCreate } from "../types/PromptCreate";
+import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { Game } from "../types/Game.tsx";
-import { Step } from "../types/Step.tsx";
+import { Game } from "../types/Game.ts";
+import { Step } from "../types/Step.ts";
 
 export default function Play() {
   const params = useParams();

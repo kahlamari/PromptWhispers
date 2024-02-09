@@ -1,4 +1,4 @@
-import { Step } from "./Step.tsx";
+import { Step } from "./Step.ts";
 
 export type Game = {
   id: string;
