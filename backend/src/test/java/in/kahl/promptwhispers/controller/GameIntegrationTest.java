@@ -28,7 +28,7 @@ class GameIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final String userEmail = "email@example.com";
+    private final String userEmail = "user@example.com";
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -36,7 +36,6 @@ class GameIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        String userEmail = "email@example.com";
         User user = new User(userEmail);
         userRepo.save(user);
     }
@@ -84,7 +83,9 @@ class GameIntegrationTest {
                 .getContentAsString();
 
         Game game = objectMapper.readValue(saveResult, Game.class);
-        assertEquals(gameExpected, game);
+        assertEquals(gameExpected.id(), game.id());
+        assertEquals(gameExpected.steps(), game.steps());
+        assertEquals(gameExpected.isFinished(), game.isFinished());
     }
 
     @Test

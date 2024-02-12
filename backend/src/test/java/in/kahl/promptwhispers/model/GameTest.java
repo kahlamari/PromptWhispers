@@ -8,14 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameTest {
 
-    private final User testUser = new User("email@example.com");
-
     @Test
     void withStepTest_whenProvidingStep_thenReturnGameWithStep() {
         // ARRANGE
-        Game newGame = new Game(testUser);
+        Game newGame = new Game();
         Step stepPrompt = new Step(StepType.PROMPT, "A hedge jumps over a sheep");
-        Game gameExpected = new Game(newGame.id(), testUser, List.of(stepPrompt), newGame.createdAt(), newGame.isFinished());
+        Game gameExpected = new Game(newGame.id(), List.of(stepPrompt), newGame.createdAt(), newGame.isFinished());
 
         // ACT
         Game gameActual = newGame.withStep(stepPrompt);
@@ -27,7 +25,7 @@ class GameTest {
     @Test
     void withStepTest_whenMaxStepsReached_thenGameIsFinished() {
         // ARRANGE
-        Game gameWith2Images = new Game(testUser)
+        Game gameWith2Images = new Game()
                 .withStep(new Step(StepType.PROMPT, "1st prompt"))
                 .withStep(new Step(StepType.IMAGE, "image1.png"))
                 .withStep(new Step(StepType.PROMPT, "2nd prompt"))
@@ -44,7 +42,7 @@ class GameTest {
     @Test
     void withStepTest_whenAddingStepToFinishedGame_thenThrowException() {
         // ARRANGE
-        Game finishedGame = new Game(testUser)
+        Game finishedGame = new Game()
                 .withStep(new Step(StepType.PROMPT, "1st prompt"))
                 .withStep(new Step(StepType.IMAGE, "image1.png"))
                 .withStep(new Step(StepType.PROMPT, "2nd prompt"))

@@ -31,7 +31,7 @@ public class GameService {
 
     public Game createGame(OAuth2User principle) {
         User user = userService.getLoggedInUser(principle);
-        Game newGame = gameRepo.save(new Game(user));
+        Game newGame = gameRepo.save(new Game());
         User userWithGame = user.withGame(newGame);
         userService.save(userWithGame);
         return newGame;

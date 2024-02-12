@@ -26,7 +26,6 @@ class GameServiceTest {
     private final DalleService dalleService = mock(DalleService.class);
     private final CloudinaryService cloudinaryService = mock(CloudinaryService.class);
     private GameService serviceUnderTest;
-    private final User testUser = new User("email@example.com");
 
     @BeforeEach
     void setUp() {
@@ -45,12 +44,11 @@ class GameServiceTest {
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
             OAuth2User oAuth2User = mock(OAuth2User.class);
+            String userEmail = "email@example.com";
+            User testUser = new User(userEmail);
+            when(userService.getLoggedInUser(oAuth2User)).thenReturn(testUser);
 
-            String userEmail = "user@example.com";
-            User user = new User(userEmail);
-            when(userService.getLoggedInUser(oAuth2User)).thenReturn(user);
-
-            Game expected = new Game("00000000-0000-0000-0000-000000000000", user,
+            Game expected = new Game("00000000-0000-0000-0000-000000000000",
                     Collections.emptyList(), time, false);
 
             when(gameRepo.save(expected)).thenReturn(expected);
@@ -69,7 +67,7 @@ class GameServiceTest {
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
         String id = "1";
-        Optional<Game> expectedGame = Optional.of(new Game(id, testUser, Collections.emptyList(), Instant.now(), false));
+        Optional<Game> expectedGame = Optional.of(new Game(id, Collections.emptyList(), Instant.now(), false));
         when(gameRepo.findById(id)).thenReturn(expectedGame);
 
         // ACT
@@ -106,12 +104,12 @@ class GameServiceTest {
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
             String gameId = "1";
-            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, testUser, Collections.emptyList(), time, false));
+            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyList(), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
             String promptInput = "Sheep jumps over hedge";
 
-            Game expectedGameWithPrompt = new Game(gameId, testUser,
+            Game expectedGameWithPrompt = new Game(gameId,
                     List.of(new Step(StepType.PROMPT, promptInput)),
                     time, false);
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
@@ -143,7 +141,7 @@ class GameServiceTest {
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
             Step prompt = new Step(StepType.PROMPT, promptInput);
-            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, testUser, List.of(prompt), time, false));
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, List.of(prompt), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
             String imageUrl = "https://example.com/image.png";
@@ -151,7 +149,7 @@ class GameServiceTest {
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
             Step generatedImage = new Step(StepType.IMAGE, imageUrl);
-            Game gameWithImageUrl = new Game(gameId, testUser,
+            Game gameWithImageUrl = new Game(gameId,
                     List.of(prompt, generatedImage), time, false);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
@@ -173,7 +171,6 @@ class GameServiceTest {
         // ARRANGE
         String gameId = "1";
         Optional<Game> gameWith3Images = Optional.of(new Game(gameId,
-                testUser,
                 Collections.emptyList(),
                 Instant.now(),
                 true));
