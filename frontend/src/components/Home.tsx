@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const navigate = useNavigate();
   const startGame = () => {
-    axios.post<Game>("/api/game/start").then((response) => {
+    axios.post<Game>("/api/games/start").then((response) => {
       navigate(`/play/${response.data.id}`);
     });
   };
