@@ -15,6 +15,10 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
+    public void save(User user) {
+        userRepo.save(user);
+    }
+
     public User getLoggedInUser(OAuth2User user) {
         if (user == null) {
             return null;
