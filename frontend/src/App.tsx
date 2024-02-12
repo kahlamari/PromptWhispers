@@ -12,8 +12,6 @@ function App() {
   function getCurrentUser() {
     axios.get<User>("/api/users").then((response) => {
       setUser(response.data);
-      console.log(response.data);
-      console.log(user);
     });
   }
 
@@ -21,9 +19,13 @@ function App() {
     getCurrentUser();
   }, []);
 
+  function logout() {
+    axios.post("/api/users/logout").then(() => getCurrentUser());
+  }
+
   return (
     <>
-      <Header user={user} />
+      <Header user={user} logout={logout} />
       <div className="flex min-h-screen items-center justify-center bg-indigo-50">
         <Routes>
           <Route path="/" element={<Home />} />
