@@ -3,8 +3,10 @@ package in.kahl.promptwhispers.service;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Step;
 import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,18 +16,22 @@ import java.util.NoSuchElementException;
 public class GameService {
     private final GameRepo gameRepo;
 
+    private final UserService userService;
+
     private final DalleService dalleService;
 
     private final CloudinaryService cloudinaryService;
 
-    public GameService(GameRepo gameRepo, DalleService dalleService, CloudinaryService cloudinaryService) {
+    public GameService(GameRepo gameRepo, UserService userService, DalleService dalleService, CloudinaryService cloudinaryService) {
         this.gameRepo = gameRepo;
+        this.userService = userService;
         this.dalleService = dalleService;
         this.cloudinaryService = cloudinaryService;
     }
 
-    public Game createGame() {
-        return gameRepo.save(new Game());
+    public Game createGame(OAuth2User principle) {
+        User user = userService.getLoggedInUser(principle);
+        return gameRepo.save(new Game(user));
     }
 
     public Game getGameById(String id) {

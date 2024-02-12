@@ -32,7 +32,7 @@ class UserServiceTest {
         UserResponse userResponseExpected = new UserResponse(user);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
         assertEquals(userResponseExpected, userResponseActual);
@@ -43,7 +43,7 @@ class UserServiceTest {
     @Test
     void getLoggedInUserTest_whenProvideNull_thenReturnNull() {
         // ARRANGE & ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(null);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(null);
 
         // ASSERT
         assertNull(userResponseActual);
@@ -57,7 +57,7 @@ class UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn(userEmail);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
         assertNull(userResponseActual);
@@ -70,7 +70,7 @@ class UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn(null);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
         assertNull(userResponseActual);
@@ -85,7 +85,7 @@ class UserServiceTest {
         when(userRepo.getUserByEmail(userEmail)).thenReturn(null);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
         assertNull(userResponseActual);

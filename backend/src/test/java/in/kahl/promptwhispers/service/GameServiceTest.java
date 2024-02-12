@@ -3,6 +3,7 @@ package in.kahl.promptwhispers.service;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Step;
 import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.Instant;
 import java.util.*;
@@ -20,13 +22,15 @@ import static org.mockito.Mockito.*;
 
 class GameServiceTest {
     private final GameRepo gameRepo = mock(GameRepo.class);
+    private final UserService userService = mock(UserService.class);
     private final DalleService dalleService = mock(DalleService.class);
     private final CloudinaryService cloudinaryService = mock(CloudinaryService.class);
     private GameService serviceUnderTest;
+    private final User testUser = new User("email@example.com");
 
     @BeforeEach
     void setUp() {
-        serviceUnderTest = new GameService(gameRepo, dalleService, cloudinaryService);
+        serviceUnderTest = new GameService(gameRepo, userService, dalleService, cloudinaryService);
     }
 
     @Test
@@ -40,13 +44,19 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
-            Game expected = new Game("00000000-0000-0000-0000-000000000000",
+            OAuth2User oAuth2User = mock(OAuth2User.class);
+
+            String userEmail = "user@example.com";
+            User user = new User(userEmail);
+            when(userService.getLoggedInUser(oAuth2User)).thenReturn(user);
+
+            Game expected = new Game("00000000-0000-0000-0000-000000000000", user,
                     Collections.emptyList(), time, false);
 
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            Game actual = serviceUnderTest.createGame();
+            Game actual = serviceUnderTest.createGame(oAuth2User);
 
             // ASSERT
             assertEquals(expected, actual);
@@ -59,7 +69,7 @@ class GameServiceTest {
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
         String id = "1";
-        Optional<Game> expectedGame = Optional.of(new Game(id, Collections.emptyList(), Instant.now(), false));
+        Optional<Game> expectedGame = Optional.of(new Game(id, testUser, Collections.emptyList(), Instant.now(), false));
         when(gameRepo.findById(id)).thenReturn(expectedGame);
 
         // ACT
@@ -96,12 +106,12 @@ class GameServiceTest {
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
             String gameId = "1";
-            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyList(), time, false));
+            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, testUser, Collections.emptyList(), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
             String promptInput = "Sheep jumps over hedge";
 
-            Game expectedGameWithPrompt = new Game(gameId,
+            Game expectedGameWithPrompt = new Game(gameId, testUser,
                     List.of(new Step(StepType.PROMPT, promptInput)),
                     time, false);
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
@@ -133,7 +143,7 @@ class GameServiceTest {
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
             Step prompt = new Step(StepType.PROMPT, promptInput);
-            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, List.of(prompt), time, false));
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, testUser, List.of(prompt), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
             String imageUrl = "https://example.com/image.png";
@@ -141,7 +151,7 @@ class GameServiceTest {
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
             Step generatedImage = new Step(StepType.IMAGE, imageUrl);
-            Game gameWithImageUrl = new Game(gameId,
+            Game gameWithImageUrl = new Game(gameId, testUser,
                     List.of(prompt, generatedImage), time, false);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
@@ -163,6 +173,7 @@ class GameServiceTest {
         // ARRANGE
         String gameId = "1";
         Optional<Game> gameWith3Images = Optional.of(new Game(gameId,
+                testUser,
                 Collections.emptyList(),
                 Instant.now(),
                 true));

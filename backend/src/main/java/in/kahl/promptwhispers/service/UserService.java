@@ -15,7 +15,7 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public UserResponse getLoggedInUser(OAuth2User user) {
+    public User getLoggedInUser(OAuth2User user) {
         if (user == null) {
             return null;
         }
@@ -28,12 +28,14 @@ public class UserService {
 
         userEmail = userEmail.trim();
 
-        User returningUser = userRepo.getUserByEmail(userEmail);
+        return userRepo.getUserByEmail(userEmail);
+    }
 
-        if (returningUser == null) {
+    public UserResponse getLoggedInUserAsUserResponse(OAuth2User user) {
+        User loggedInUser = getLoggedInUser(user);
+        if (loggedInUser == null) {
             return null;
         }
-
-        return new UserResponse(returningUser);
+        return new UserResponse(loggedInUser);
     }
 }
