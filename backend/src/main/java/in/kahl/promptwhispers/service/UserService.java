@@ -36,4 +36,21 @@ public class UserService {
 
         return new UserResponse(returningUser);
     }
+
+    public boolean saveNewUser(OAuth2User oAuth2User) {
+        String userEmail = oAuth2User.getAttribute("email");
+
+        if (userEmail == null || userEmail.isEmpty()) {
+            return false;
+        }
+
+        boolean isReturningUser = userRepo.existsByEmail(userEmail.trim());
+
+        if (!isReturningUser) {
+            User newUser = new User(userEmail.trim());
+            userRepo.save(newUser);
+        }
+
+        return true;
+    }
 }

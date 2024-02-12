@@ -1,8 +1,6 @@
 package in.kahl.promptwhispers.security;
 
-
-import in.kahl.promptwhispers.model.User;
-import in.kahl.promptwhispers.repo.UserRepo;
+import in.kahl.promptwhispers.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,10 +25,10 @@ public class SecurityConfig {
     @Value("${app.environment}")
     private String environment;
 
-    private final UserRepo userRepo;
+    private final UserService userService;
 
-    public SecurityConfig(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public SecurityConfig(UserService userService) {
+        this.userService = userService;
     }
 
     @Bean
@@ -72,28 +70,11 @@ public class SecurityConfig {
         return request -> {
             OAuth2User user = delegate.loadUser(request);
 
-            if (saveNewUser(user)) {
+            if (userService.saveNewUser(user)) {
                 return user;
             }
 
             return null;
         };
-    }
-
-    protected boolean saveNewUser(OAuth2User user) {
-        String userEmail = user.getAttribute("email");
-
-        if (userEmail == null || userEmail.isEmpty()) {
-            return false;
-        }
-
-        boolean isReturningUser = userRepo.existsByEmail(userEmail.trim());
-
-        if (!isReturningUser) {
-            User newUser = new User(userEmail.trim());
-            userRepo.save(newUser);
-        }
-
-        return true;
     }
 }
