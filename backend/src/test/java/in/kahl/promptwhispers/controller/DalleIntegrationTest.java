@@ -1,4 +1,4 @@
-package in.kahl.promptwhispers.integration;
+package in.kahl.promptwhispers.controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,16 +72,18 @@ public class DalleIntegrationTest {
     @DirtiesContext
     void generateImageTest_whenRequested_thenReturnGeneratedImageUrl() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/game/start")
-                        .contentType(MediaType.APPLICATION_JSON))
+        String saveResult = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("login", "test-user"))))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
         Game game = objectMapper.readValue(saveResult, Game.class);
 
-        saveResult = mockMvc.perform(post("/api/game/" + game.id() + "/prompt")
+        saveResult = mockMvc.perform(post("/api/games/" + game.id() + "/prompt")
                 .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", "user@example.com")))
                 .content("""
                            {"prompt": "Goat jumps over a hedge."}
                         """))
@@ -110,8 +113,9 @@ public class DalleIntegrationTest {
         when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
-        String resultJSON = mockMvc.perform(post("/api/game/" + game.id() + "/generateImage")
-                        .contentType(MediaType.APPLICATION_JSON))
+        String resultJSON = mockMvc.perform(post("/api/games/" + game.id() + "/generateImage")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", "user@example.com"))))
                 // ASSERT
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())

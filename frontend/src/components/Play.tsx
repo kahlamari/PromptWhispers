@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { PromptCreate } from "../types/PromptCreate";
+import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { Game } from "../types/Game.tsx";
-import { Step } from "../types/Step.tsx";
+import { Game } from "../types/Game.ts";
+import { Step } from "../types/Step.ts";
 
 export default function Play() {
   const params = useParams();
@@ -17,7 +17,7 @@ export default function Play() {
   ): Promise<Game | undefined> => {
     try {
       const response = await axios.post<Game>(
-        `/api/game/${gameId}/prompt`,
+        `/api/games/${gameId}/prompt`,
         promptToSubmit,
       );
       return response.data;
@@ -30,7 +30,7 @@ export default function Play() {
   const requestImageGeneration = async (): Promise<Game | undefined> => {
     try {
       const response = await axios.post<Game>(
-        `/api/game/${gameId}/generateImage`,
+        `/api/games/${gameId}/generateImage`,
       );
       return response.data;
     } catch (e) {
@@ -40,7 +40,7 @@ export default function Play() {
   };
 
   const getGame = (gameId: string) => {
-    axios.get<Game>(`/api/game/${gameId}`).then((response) => {
+    axios.get<Game>(`/api/games/${gameId}`).then((response) => {
       setGame(response.data);
     });
   };
@@ -93,7 +93,7 @@ export default function Play() {
       {getLastImage() && (
         <img
           className="h-128 w-auto rounded-2xl"
-          alt="Image generated based on previous prompt"
+          alt="generated based on previous prompt"
           src={getLastImage()?.content}
         />
       )}
