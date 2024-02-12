@@ -32,7 +32,7 @@ class SecurityConfigTest {
         when(userRepo.save(testUser)).thenReturn(testUser);
 
         // ACT
-        Boolean actual = underTest.saveNewUser(oauth2User);
+        boolean actual = underTest.saveNewUser(oauth2User);
 
         // ASSERT
         assertTrue(actual);
@@ -50,7 +50,7 @@ class SecurityConfigTest {
         when(userRepo.existsByEmail(emailAddress)).thenReturn(true);
 
         // ACT
-        Boolean actual = underTest.saveNewUser(oauth2User);
+        boolean actual = underTest.saveNewUser(oauth2User);
 
         // ASSERT
         assertTrue(actual);
@@ -66,7 +66,7 @@ class SecurityConfigTest {
         when(oauth2User.getAttribute("email")).thenReturn(emailAddress);
 
         // ACT
-        Boolean actual = underTest.saveNewUser(oauth2User);
+        boolean actual = underTest.saveNewUser(oauth2User);
 
         // ASSERT
         assertFalse(actual);
