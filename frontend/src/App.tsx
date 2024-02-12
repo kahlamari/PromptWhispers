@@ -23,7 +23,7 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header user={user} />
       <div className="flex min-h-screen items-center justify-center bg-indigo-50">
         <Routes>
           <Route path="/" element={<Home />} />
