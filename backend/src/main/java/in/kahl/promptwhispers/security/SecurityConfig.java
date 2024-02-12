@@ -83,7 +83,7 @@ public class SecurityConfig {
             boolean isReturningUser = userRepo.existsByEmail(userEmailTrim);
 
             if (!isReturningUser) {
-                User newUser = new User(userEmailTrim, true);
+                User newUser = new User(userEmailTrim);
                 userRepo.save(newUser);
             }
 

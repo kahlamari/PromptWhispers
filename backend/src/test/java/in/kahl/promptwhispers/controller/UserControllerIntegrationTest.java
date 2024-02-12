@@ -45,7 +45,7 @@ class UserControllerIntegrationTest {
     @DirtiesContext
     void getUserTest_whenUserLoggedIn_thenReturnUserResponseDTO() throws Exception {
         // ARRANGE
-        User testUser = new User("user@example.com", true);
+        User testUser = new User("user@example.com");
         userRepo.save(testUser);
 
         OAuth2User oAuth2User = mock(OAuth2User.class);

@@ -27,7 +27,7 @@ class UserServiceTest {
         String userEmail = "user@example.com";
         when(oAuth2User.getAttribute("email")).thenReturn(userEmail);
 
-        User user = new User(userEmail, true);
+        User user = new User(userEmail);
         when(userRepo.getUserByEmail(userEmail)).thenReturn(user);
         UserResponse userResponseExpected = new UserResponse(user);
 

@@ -10,11 +10,11 @@ public record User(
         @Id
         String id,
         String email,
-        Boolean isGoogle,
+        AuthProvider authProvider,
         Instant createdAt
 ) {
-    public User(String email, Boolean isGoogle) {
-        this(UUID.randomUUID().toString(), email, isGoogle, Instant.now());
+    public User(String email) {
+        this(UUID.randomUUID().toString(), email, AuthProvider.GOOGLE, Instant.now());
     }
 }
 
