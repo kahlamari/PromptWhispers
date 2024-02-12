@@ -56,7 +56,7 @@ class UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn(userEmail);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
+        UserResponse userResponseActual = serviceUnderTest.getLoggedInUser(oAuth2User);
 
         // ASSERT
         assertNull(userResponseActual);

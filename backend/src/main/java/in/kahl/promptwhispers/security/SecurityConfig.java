@@ -1,7 +1,5 @@
 package in.kahl.promptwhispers.security;
 
-
-import in.kahl.promptwhispers.repo.UserRepo;
 import in.kahl.promptwhispers.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +25,9 @@ public class SecurityConfig {
     @Value("${app.environment}")
     private String environment;
 
-    private final UserRepo userRepo;
-
     private final UserService userService;
 
-    public SecurityConfig(UserRepo userRepo, UserService userService) {
-        this.userRepo = userRepo;
+    public SecurityConfig(UserService userService) {
         this.userService = userService;
     }
 
