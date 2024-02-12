@@ -72,22 +72,28 @@ public class SecurityConfig {
         return request -> {
             OAuth2User user = delegate.loadUser(request);
 
-            String userEmail = user.getAttribute("email");
-
-            if (userEmail == null || userEmail.isEmpty()) {
-                return null;
+            if (saveNewUser(user)) {
+                return user;
             }
 
-            String userEmailTrim = userEmail.trim();
-
-            boolean isReturningUser = userRepo.existsByEmail(userEmailTrim);
-
-            if (!isReturningUser) {
-                User newUser = new User(userEmailTrim);
-                userRepo.save(newUser);
-            }
-
-            return user;
+            return null;
         };
+    }
+
+    protected boolean saveNewUser(OAuth2User user) {
+        String userEmail = user.getAttribute("email");
+
+        if (userEmail == null || userEmail.isEmpty()) {
+            return false;
+        }
+
+        boolean isReturningUser = userRepo.existsByEmail(userEmail.trim());
+
+        if (!isReturningUser) {
+            User newUser = new User(userEmail.trim());
+            userRepo.save(newUser);
+        }
+
+        return true;
     }
 }
