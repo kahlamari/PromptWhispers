@@ -8,6 +8,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
@@ -26,6 +28,11 @@ public class GameController {
     @GetMapping("{gameId}")
     public Game getGame(@PathVariable String gameId) {
         return gameService.getGameById(gameId);
+    }
+
+    @GetMapping()
+    public List<Game> getAllGames(@AuthenticationPrincipal OAuth2User principal) {
+        return gameService.getGamesByUser(principal);
     }
 
     @PostMapping("{gameId}/prompt")

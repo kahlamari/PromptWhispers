@@ -41,6 +41,11 @@ public class GameService {
         return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
+    public List<Game> getGamesByUser(OAuth2User principal) {
+        User user = userService.getLoggedInUser(principal);
+        return userService.getAllGames(user.id());
+    }
+
     private static Step getMostRecentPrompt(List<Step> steps) {
         if (steps.isEmpty()) {
             throw new NoSuchElementException();
