@@ -1,4 +1,10 @@
-export default function Header() {
+import { User } from "../types/User.ts";
+
+type HeaderProps = {
+  user: User;
+};
+
+export default function Header(props: HeaderProps) {
   function login() {
     const host =
       window.location.host === "localhost:5173"
@@ -9,13 +15,19 @@ export default function Header() {
   }
 
   return (
-    <div className="top-0 flex h-16 w-full flex-row-reverse items-center justify-start bg-indigo-600">
-      <button
-        onClick={login}
-        className="w-auto justify-center rounded-2xl bg-indigo-50 px-2 py-2 font-light text-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      >
-        Login
-      </button>
+    <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3">
+      <div className="text-2xl font-extralight text-indigo-50">
+        Prompt Whispers
+      </div>
+
+      {!!props.user && (
+        <button
+          onClick={login}
+          className="w-auto justify-center rounded-2xl bg-indigo-50 px-2 py-2 font-light text-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Login
+        </button>
+      )}
     </div>
   );
 }
