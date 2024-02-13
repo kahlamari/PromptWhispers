@@ -16,7 +16,7 @@ public record Game(
         boolean isFinished
 ) {
     public Game() {
-        this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now(), false);
+        this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.ofEpochMilli(Instant.now().toEpochMilli()), false);
     }
 
     public static final int MAX_IMAGE_STEPS = 3;

@@ -35,6 +35,12 @@ public class GameController {
         return gameService.getGamesByUser(principal);
     }
 
+    @DeleteMapping("{gameId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteGame(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        gameService.deleteGame(principal, gameId);
+    }
+
     @PostMapping("{gameId}/prompt")
     public Game submitPrompt(@PathVariable String gameId, @RequestBody PromptCreate prompt) {
         return gameService.submitPrompt(gameId, prompt);

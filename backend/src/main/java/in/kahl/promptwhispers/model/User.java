@@ -5,10 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public record User(
         @Id
@@ -23,10 +20,20 @@ public record User(
         this(UUID.randomUUID().toString(), email, Collections.emptyList(), AuthProvider.GOOGLE, Instant.now());
     }
 
+    public User withGames(List<Game> gamesList) {
+        return new User(id(), email(), gamesList, authProvider(), createdAt());
+    }
+
     public User withGame(Game game) {
         List<Game> updatedGames = new LinkedList<>(games());
         updatedGames.add(game);
-        return new User(id(), email(), updatedGames, authProvider(), createdAt());
+        return withGames(updatedGames);
+    }
+
+    public User withoutGame(Game game) {
+        List<Game> updatedGames = new ArrayList<>(games());
+        updatedGames.remove(game);
+        return withGames(updatedGames);
     }
 }
 

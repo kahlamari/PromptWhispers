@@ -6,6 +6,7 @@ import in.kahl.promptwhispers.model.StepType;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,18 @@ public class GameService {
     public List<Game> getGamesByUser(OAuth2User principal) {
         User user = userService.getLoggedInUser(principal);
         return userService.getAllGames(user.id());
+    }
+
+    public void deleteGame(OAuth2User principal, String gameId) {
+        User user = userService.getLoggedInUser(principal);
+        Game game = getGameById(gameId);
+
+        if (user.games().contains(game)) {
+            userService.removeGame(user, game);
+            gameRepo.delete(game);
+        } else {
+            throw new AccessDeniedException("Not allowed to delete this game");
+        }
     }
 
     private static Step getMostRecentPrompt(List<Step> steps) {

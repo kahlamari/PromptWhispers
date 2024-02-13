@@ -12,20 +12,55 @@ export default function GameHistory() {
     });
   }
 
+  function deleteGame(gameId: string) {
+    axios.delete(`/api/games/${gameId}`).then(() => getGames());
+  }
+
   useEffect(() => {
     getGames();
   }, []);
   return (
-    <ul role="list" className="divide-y divide-gray-100">
-      {games.map((game) => (
-        <li key={game.id} className="flex justify-between gap-x-6 py-5">
-          <div className="min-w-0 flex-auto">
-            <p className="text-sm font-semibold leading-6 text-gray-900">
-              {game.id}
-            </p>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="relative overflow-x-auto">
+      <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+        <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              Game
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Steps
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Finished
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Delete
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {games.map((game) => (
+            <tr
+              key={game.id}
+              className="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
+            >
+              <th
+                scope="row"
+                className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
+              >
+                {game.id}
+              </th>
+              <td className="px-6 py-4">{game.steps.length}</td>
+              <td className="px-6 py-4">
+                {game.isFinished ? "Completed" : "Not finished"}
+              </td>
+              <td className="px-6 py-4">
+                <button onClick={() => deleteGame(game.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

@@ -67,4 +67,8 @@ public class UserService {
     public List<Game> getAllGames(String userId) {
         return userRepo.findById(userId).orElseThrow(NoSuchElementException::new).games();
     }
+
+    public User removeGame(User user, Game game) {
+        return userRepo.save(user.withoutGame(game));
+    }
 }

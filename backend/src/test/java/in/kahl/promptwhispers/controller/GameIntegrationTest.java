@@ -1,5 +1,6 @@
 package in.kahl.promptwhispers.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import in.kahl.promptwhispers.model.Game;
@@ -13,12 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -68,10 +70,12 @@ class GameIntegrationTest {
                 .getContentAsString();
 
         Game gameExpected = objectMapper.readValue(saveArrangeResult, Game.class);
+
         // ACT
-        String saveResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/games/" + gameExpected.id())
+        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+
                 // ASSERT
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
@@ -86,6 +90,80 @@ class GameIntegrationTest {
         assertEquals(gameExpected.id(), game.id());
         assertEquals(gameExpected.steps(), game.steps());
         assertEquals(gameExpected.isFinished(), game.isFinished());
+    }
+
+    @Test
+    @DirtiesContext
+    void getAllGamesTest_whenRequestGames_thenReturnGames() throws Exception {
+        // ARRANGE
+        String game1Result = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String game2Result = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
+        Game game2 = objectMapper.readValue(game2Result, Game.class);
+
+        // ACT
+        String gameListResult = mockMvc.perform(get("/api/games")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+
+                // ASSERT
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<Game> gameListActual = objectMapper.readValue(gameListResult, new TypeReference<List<Game>>() {
+        });
+
+        assertEquals(List.of(game1, game2), gameListActual);
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteGameTest_whenGameExists_thenRemoveGame() throws Exception {
+        // ARRANGE
+        String game1Result = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String game2Result = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
+        Game game2 = objectMapper.readValue(game2Result, Game.class);
+
+        // ACT
+        mockMvc.perform(delete("/api/games/" + game1.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+
+                // ASSERT
+                .andExpect(status().isNoContent());
+
+        List<Game> gameListActual = userRepo.getUserByEmail(userEmail).games();
+
+        assertEquals(List.of(game2), gameListActual);
+        assertEquals(1, gameListActual.size());
     }
 
     @Test
