@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +39,7 @@ class GameServiceTest {
     @Test
     void createGameTest_whenGameCreationRequested_thenNewGameReturned() {
         // ARRANGE
-        Instant time = Instant.now();
+        Instant time = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
         try (MockedStatic<Instant> mockedInstant = mockStatic(Instant.class);
@@ -52,7 +53,7 @@ class GameServiceTest {
 
             Game expected = new Game("00000000-0000-0000-0000-000000000000",
                     Collections.emptyList(),
-                    Instant.ofEpochMilli(time.toEpochMilli()),
+                    time,
                     false);
 
             when(gameRepo.save(expected)).thenReturn(expected);
