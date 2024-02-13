@@ -125,7 +125,7 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<Game> gameListActual = objectMapper.readValue(gameListResult, new TypeReference<List<Game>>() {
+        List<Game> gameListActual = objectMapper.readValue(gameListResult, new TypeReference<>() {
         });
 
         assertEquals(List.of(game1, game2), gameListActual);
