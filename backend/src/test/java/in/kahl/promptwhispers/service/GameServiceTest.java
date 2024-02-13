@@ -3,6 +3,7 @@ package in.kahl.promptwhispers.service;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Step;
 import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,8 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,19 +24,22 @@ import static org.mockito.Mockito.*;
 
 class GameServiceTest {
     private final GameRepo gameRepo = mock(GameRepo.class);
+    private final UserService userService = mock(UserService.class);
     private final DalleService dalleService = mock(DalleService.class);
     private final CloudinaryService cloudinaryService = mock(CloudinaryService.class);
+
+    private final String userEmail = "user@example.com";
     private GameService serviceUnderTest;
 
     @BeforeEach
     void setUp() {
-        serviceUnderTest = new GameService(gameRepo, dalleService, cloudinaryService);
+        serviceUnderTest = new GameService(gameRepo, userService, dalleService, cloudinaryService);
     }
 
     @Test
     void createGameTest_whenGameCreationRequested_thenNewGameReturned() {
         // ARRANGE
-        Instant time = Instant.now();
+        Instant time = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
         try (MockedStatic<Instant> mockedInstant = mockStatic(Instant.class);
@@ -40,13 +47,19 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
+            OAuth2User oAuth2User = mock(OAuth2User.class);
+            User testUser = new User(userEmail);
+            when(userService.getLoggedInUser(oAuth2User)).thenReturn(testUser);
+
             Game expected = new Game("00000000-0000-0000-0000-000000000000",
-                    Collections.emptyList(), time, false);
+                    Collections.emptyList(),
+                    time,
+                    false);
 
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            Game actual = serviceUnderTest.createGame();
+            Game actual = serviceUnderTest.createGame(oAuth2User);
 
             // ASSERT
             assertEquals(expected, actual);
@@ -82,6 +95,58 @@ class GameServiceTest {
 
         // ASSERT
         assertThrows(NoSuchElementException.class, executable);
+    }
+
+    @Test
+    void deleteGameTest_whenGameExists_thenRemoveGame() {
+        // ARRANGE
+        Game testGameToDelete = new Game();
+        Game testGameToKeep = new Game();
+
+        User userExpected = new User(userEmail)
+                .withGame(testGameToDelete);
+
+        User testUser = userExpected
+                .withGame(testGameToKeep);
+
+        OAuth2User mockedPrincipal = mock(OAuth2User.class);
+        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
+        when(gameRepo.findById(testGameToDelete.id())).thenReturn(Optional.of(testGameToDelete));
+        when(userService.removeGame(testUser, testGameToDelete)).thenReturn(userExpected);
+        doNothing().when(gameRepo).delete(testGameToDelete);
+
+        // ACT
+        serviceUnderTest.deleteGame(mockedPrincipal, testGameToDelete.id());
+
+        // ASSERT
+        verify(userService).getLoggedInUser(mockedPrincipal);
+        verify(userService).removeGame(testUser, testGameToDelete);
+        verifyNoMoreInteractions(userService);
+
+        verify(gameRepo).findById(testGameToDelete.id());
+        verify(gameRepo).delete(testGameToDelete);
+        verifyNoMoreInteractions(gameRepo);
+
+    }
+
+    @Test
+    void deleteGameTest_whenUserDoesNotOwnGame_thenThrowException() {
+        // ARRANGE
+        Game testGameToDelete = new Game();
+        Game testGameToKeep = new Game();
+        User testUser = new User(userEmail)
+                .withGame(testGameToKeep);
+
+        OAuth2User mockedPrincipal = mock(OAuth2User.class);
+        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
+        when(gameRepo.findById(testGameToDelete.id())).thenReturn(Optional.of(testGameToDelete));
+        // ACT
+        Executable executable = () -> serviceUnderTest.deleteGame(mockedPrincipal, testGameToDelete.id());
+
+        // ASSERT
+        assertThrows(AccessDeniedException.class, executable);
     }
 
     @Test

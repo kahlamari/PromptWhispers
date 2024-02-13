@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { User } from "./types/User.ts";
 import axios from "axios";
 import Header from "./components/Header.tsx";
+import GameHistory from "./components/GameHistory.tsx";
 
 function App() {
   const [user, setUser] = useState<User>(null);
@@ -30,6 +31,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId/" element={<Play />} />
+          <Route path="/games" element={<GameHistory />} />
         </Routes>
       </div>
     </>

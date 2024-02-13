@@ -5,10 +5,13 @@ import com.cloudinary.Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Step;
+import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.repo.UserRepo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +53,11 @@ public class DalleIntegrationTest {
     @MockBean
     private Cloudinary cloudinary;
 
+    private final String userEmail = "user@example.com";
+
+    @Autowired
+    private UserRepo userRepo;
+
     @DynamicPropertySource
     public static void configureUrl(DynamicPropertyRegistry registry) {
         registry.add("app.dalle.api.url", () -> mockWebServer.url("/").toString());
@@ -68,13 +76,19 @@ public class DalleIntegrationTest {
         mockWebServer.shutdown();
     }
 
+    @BeforeEach
+    void setUp() {
+        User user = new User(userEmail);
+        userRepo.save(user);
+    }
+
     @Test
     @DirtiesContext
     void generateImageTest_whenRequested_thenReturnGeneratedImageUrl() throws Exception {
         // ARRANGE
         String saveResult = mockMvc.perform(post("/api/games/start")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("login", "test-user"))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -83,7 +97,7 @@ public class DalleIntegrationTest {
 
         saveResult = mockMvc.perform(post("/api/games/" + game.id() + "/prompt")
                 .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", "user@example.com")))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                 .content("""
                            {"prompt": "Goat jumps over a hedge."}
                         """))

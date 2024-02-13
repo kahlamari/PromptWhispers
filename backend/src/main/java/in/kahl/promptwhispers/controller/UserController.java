@@ -20,6 +20,6 @@ public class UserController {
 
     @GetMapping
     public UserResponse getUser(@AuthenticationPrincipal OAuth2User user) {
-        return userService.getLoggedInUser(user);
+        return userService.getLoggedInUserAsUserResponse(user);
     }
 }

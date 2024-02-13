@@ -1,10 +1,14 @@
 package in.kahl.promptwhispers.service;
 
+import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.UserResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
@@ -15,7 +19,11 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public UserResponse getLoggedInUser(OAuth2User user) {
+    public void save(User user) {
+        userRepo.save(user);
+    }
+
+    public User getLoggedInUser(OAuth2User user) {
         if (user == null) {
             return null;
         }
@@ -28,13 +36,15 @@ public class UserService {
 
         userEmail = userEmail.trim();
 
-        User returningUser = userRepo.getUserByEmail(userEmail);
+        return userRepo.getUserByEmail(userEmail);
+    }
 
-        if (returningUser == null) {
+    public UserResponse getLoggedInUserAsUserResponse(OAuth2User user) {
+        User loggedInUser = getLoggedInUser(user);
+        if (loggedInUser == null) {
             return null;
         }
-
-        return new UserResponse(returningUser);
+        return new UserResponse(loggedInUser);
     }
 
     public boolean saveNewUser(OAuth2User oAuth2User) {
@@ -52,5 +62,13 @@ public class UserService {
         }
 
         return true;
+    }
+
+    public List<Game> getAllGames(String userId) {
+        return userRepo.findById(userId).orElseThrow(NoSuchElementException::new).games();
+    }
+
+    public User removeGame(User user, Game game) {
+        return userRepo.save(user.withoutGame(game));
     }
 }

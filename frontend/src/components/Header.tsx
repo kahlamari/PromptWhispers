@@ -1,4 +1,5 @@
 import { User } from "../types/User.ts";
+import { Link } from "react-router-dom";
 
 type HeaderProps = {
   user: User;
@@ -16,10 +17,9 @@ export default function Header(props: HeaderProps) {
   }
 
   return (
-    <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3">
-      <div className="text-2xl font-extralight text-indigo-50">
-        Prompt Whispers
-      </div>
+    <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3 text-indigo-50">
+      <div className="text-2xl font-extralight">Prompt Whispers</div>
+      <Link to="/games">Games</Link>
 
       {!props.user && (
         <button

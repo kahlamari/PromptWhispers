@@ -36,6 +36,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/user/").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/games").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/games/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/games/*/prompt").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/games/*/generateImage").authenticated()

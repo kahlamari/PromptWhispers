@@ -3,6 +3,7 @@ package in.kahl.promptwhispers.model;
 import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,7 @@ public record Game(
         boolean isFinished
 ) {
     public Game() {
-        this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now(), false);
+        this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now().truncatedTo(ChronoUnit.MILLIS), false);
     }
 
     public static final int MAX_IMAGE_STEPS = 3;
