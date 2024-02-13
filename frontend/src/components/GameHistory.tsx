@@ -2,8 +2,10 @@ import { Game } from "../types/Game.ts";
 import axios from "axios";
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function GameHistory() {
+  const navigate = useNavigate();
   const [games, setGames] = useState<Game[]>([]);
 
   function getGames() {
@@ -42,7 +44,8 @@ export default function GameHistory() {
           {games.map((game) => (
             <tr
               key={game.id}
-              className="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
+              onClick={() => navigate(`${game.id}`)}
+              className="cursor-pointer border-b bg-white dark:border-gray-700 dark:bg-gray-800"
             >
               <th
                 scope="row"
