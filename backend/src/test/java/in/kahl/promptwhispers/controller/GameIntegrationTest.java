@@ -102,7 +102,7 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
-                        {"message":"NoSuchElementException. The game associated with your request does not exist."}
+                        {"message":"NoSuchElementException: The game associated with your request does not exist."}
                         """));
     }
 
@@ -204,7 +204,7 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isForbidden())
                 .andExpect(content().json("""
-                        {"message":"AccessDeniedException. Your request tries to access a game you do not have privileges to access."}
+                        {"message":"AccessDeniedException: You are not allowed to delete this game."}
                         """));
     }
 
