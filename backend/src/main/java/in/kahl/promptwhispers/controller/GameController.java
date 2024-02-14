@@ -58,12 +58,12 @@ public class GameController {
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage handleGameNotFound() {
-        return new ErrorMessage("NoSuchElementException. The game associated with your request does not exist.");
+        return new ErrorMessage("NoSuchElementException: The game associated with your request does not exist.");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage handleAccessDenied() {
-        return new ErrorMessage("AccessDeniedException. Your request tries to access a game you do not have privileges to access.");
+    public ErrorMessage handleAccessDenied(AccessDeniedException ex) {
+        return new ErrorMessage("AccessDeniedException: " + ex.getMessage());
     }
 }

@@ -68,4 +68,30 @@ class UserControllerIntegrationTest {
         // ASSERT
         assertEquals(userResponseExpected, userResponseActual);
     }
+
+    @Test
+    @DirtiesContext
+    void getUserTest_whenAuthTokenEmailIsNull_thenThrowException() throws Exception {
+        // ARRANGE & ACT
+        mockMvc.perform(get("/api/users")
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", null))))
+                // ASSERT
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("""
+                        {"message":"GoogleEmailNotFoundException: Email must be present to proceed."}
+                        """));
+    }
+
+    @Test
+    @DirtiesContext
+    void getUserTest_whenAuthTokenEmailIsEmpty_thenThrowException() throws Exception {
+        // ARRANGE & ACT
+        mockMvc.perform(get("/api/users")
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", ""))))
+                // ASSERT
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("""
+                        {"message":"GoogleEmailNotFoundException: Email must be present to proceed."}
+                        """));
+    }
 }

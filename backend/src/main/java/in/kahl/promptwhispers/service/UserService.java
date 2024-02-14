@@ -1,5 +1,6 @@
 package in.kahl.promptwhispers.service;
 
+import in.kahl.promptwhispers.exception.GoogleEmailNotFoundException;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.UserResponse;
@@ -25,13 +26,14 @@ public class UserService {
 
     public User getLoggedInUser(OAuth2User user) {
         if (user == null) {
+            // OAuth2User object is null when the user is not logged in.
             return null;
         }
 
         String userEmail = user.getAttribute("email");
 
         if (userEmail == null || userEmail.isEmpty()) {
-            return null;
+            throw new GoogleEmailNotFoundException("Email must be present to proceed.");
         }
 
         userEmail = userEmail.trim();
