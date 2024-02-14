@@ -73,19 +73,13 @@ class UserControllerIntegrationTest {
     @DirtiesContext
     void getUserTest_whenAuthTokenEmailIsNull_thenThrowException() throws Exception {
         // ARRANGE & ACT
-        String result = mockMvc.perform(get("/api/users")
+        mockMvc.perform(get("/api/users")
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", null))))
                 // ASSERT
                 .andExpect(status().isBadRequest())
-                //.andExpect(content().json("""
-                //        {"message":"GoogleEmailNotFoundException: Email must be present to proceed."}
-                //        """))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        System.out.println("next is the result");
-        System.out.println(result);
+                .andExpect(content().json("""
+                        {"message":"GoogleEmailNotFoundException: Email must be present to proceed."}
+                        """));
     }
 
     @Test
