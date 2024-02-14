@@ -21,8 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -90,6 +89,21 @@ class GameIntegrationTest {
         assertEquals(gameExpected.id(), game.id());
         assertEquals(gameExpected.steps(), game.steps());
         assertEquals(gameExpected.isFinished(), game.isFinished());
+    }
+
+    @Test
+    @DirtiesContext
+    void getGameTest_whenGameNotExists_thenThrowException() throws Exception {
+        // ACT
+        mockMvc.perform(get("/api/games/not_existent")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+
+                // ASSERT
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("""
+                        {"message":"NoSuchElementException: The game associated with your request does not exist."}
+                        """));
     }
 
     @Test
@@ -164,6 +178,34 @@ class GameIntegrationTest {
 
         assertEquals(List.of(game2), gameListActual);
         assertEquals(1, gameListActual.size());
+    }
+
+    @Test
+    @DirtiesContext
+    void deleteGameTest_whenUserNotOwner_thenThrowException() throws Exception {
+        // ARRANGE
+        String game1Result = mockMvc.perform(post("/api/games/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
+
+        User userWithoutGame = new User("2" + userEmail);
+        userRepo.save(userWithoutGame);
+
+        // ACT
+        mockMvc.perform(delete("/api/games/" + game1.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userWithoutGame.email()))))
+
+                // ASSERT
+                .andExpect(status().isForbidden())
+                .andExpect(content().json("""
+                        {"message":"AccessDeniedException: You are not allowed to delete this game."}
+                        """));
     }
 
     @Test

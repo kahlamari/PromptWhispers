@@ -1,5 +1,6 @@
 package in.kahl.promptwhispers.service;
 
+import in.kahl.promptwhispers.exception.GoogleEmailNotFoundException;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.UserResponse;
@@ -63,23 +64,23 @@ class UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn(emptyUserEmail);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
+        Executable executable = () -> serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
-        assertNull(userResponseActual);
+        assertThrows(GoogleEmailNotFoundException.class, executable);
     }
 
     @Test
-    void getLoggedInUserTest_whenEmailNull_thenReturnNull() {
+    void getLoggedInUserTest_whenEmailNull_thenThrowException() {
         // ARRANGE
         OAuth2User oAuth2User = mock(OAuth2User.class);
         when(oAuth2User.getAttribute("email")).thenReturn(null);
 
         // ACT
-        UserResponse userResponseActual = serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
+        Executable executable = () -> serviceUnderTest.getLoggedInUserAsUserResponse(oAuth2User);
 
         // ASSERT
-        assertNull(userResponseActual);
+        assertThrows(GoogleEmailNotFoundException.class, executable);
     }
 
     @Test

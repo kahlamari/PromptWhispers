@@ -55,7 +55,7 @@ public class GameService {
             userService.removeGame(user, game);
             gameRepo.delete(game);
         } else {
-            throw new AccessDeniedException("Not allowed to delete this game");
+            throw new AccessDeniedException("You are not allowed to delete this game.");
         }
     }
 
