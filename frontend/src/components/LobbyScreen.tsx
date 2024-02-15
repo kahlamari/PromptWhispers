@@ -5,7 +5,7 @@ import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
 
 type LobbyScreenProps = {
-  loggedInUser: User;
+  readonly loggedInUser: User;
 };
 
 export default function LobbyScreen(props: LobbyScreenProps) {
