@@ -153,7 +153,7 @@ class LobbyIntegrationTest {
 
         Lobby lobby = objectMapper.readValue(saveArrangeResult, Lobby.class);
 
-        User playerToLeave = new User("join" + userEmail);
+        User playerToLeave = new User("leave" + userEmail);
         userRepo.save(playerToLeave);
 
         String lobbyWithPlayerJSON = mockMvc.perform(put("/api/lobbies/" + lobby.id() + "/join")
@@ -181,6 +181,31 @@ class LobbyIntegrationTest {
 
         Lobby lobbyActual = objectMapper.readValue(lobbyJSON, Lobby.class);
         assertFalse(lobbyActual.players().contains(playerToLeave));
+    }
+
+    @Test
+    @DirtiesContext
+    void leaveLobbyTest_whenLobbyHostRequestsLeave_thenThrowException() throws Exception {
+        // ARRANGE
+        String saveArrangeResult = mockMvc.perform(post("/api/lobbies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Lobby lobby = objectMapper.readValue(saveArrangeResult, Lobby.class);
+
+        // ACT
+        mockMvc.perform(put("/api/lobbies/" + lobby.id() + "/leave")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+
+                // ASSERT
+                .andExpect(status().isForbidden())
+                .andExpect(content().json("""
+                        {"message":"AccessDeniedException: You cannot leave the lobby when you are the host."}
+                        """));
     }
 
     @Test

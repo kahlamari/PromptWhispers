@@ -41,6 +41,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/games/*/prompt").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/games/*/generateImage").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/games/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/lobbies").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/lobbies/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/lobbies/*/join").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/lobbies/*/leave").authenticated()
                         .anyRequest().permitAll())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .oauth2Login(oauth2 -> {

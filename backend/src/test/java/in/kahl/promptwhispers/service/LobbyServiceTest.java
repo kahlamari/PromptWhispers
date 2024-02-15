@@ -141,6 +141,23 @@ class LobbyServiceTest {
     }
 
     @Test
+    void leaveLobbyTest_whenUserIsHost_thenThrowException() {
+        // ARRANGE
+        User playerHost = new User(userEmail);
+        OAuth2User mockedPrincipal = mock(OAuth2User.class);
+        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(playerHost);
+
+        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, List.of(playerHost), false, false, Instant.now()));
+        when(lobbyRepo.findById(lobbyInput.get().id())).thenReturn(lobbyInput);
+
+        // ACT
+        Executable executable = () -> serviceUnderTest.leaveLobby(mockedPrincipal, lobbyInput.get().id());
+
+        // ASSERT
+        assertThrows(AccessDeniedException.class, executable);
+    }
+
+    @Test
     void deleteLobbyTest_whenUserIsHost_thenRemoveLobby() {
         // ARRANGE
         String id = "1";

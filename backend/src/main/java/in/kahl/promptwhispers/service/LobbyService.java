@@ -40,6 +40,10 @@ public class LobbyService {
         User user = userService.getLoggedInUser(principal);
         Lobby lobby = getLobbyById(id);
 
+        if (lobby.host().equals(user)) {
+            throw new AccessDeniedException("You cannot leave the lobby when you are the host.");
+        }
+
         lobby.players().remove(user);
         return lobbyRepo.save(lobby);
     }
