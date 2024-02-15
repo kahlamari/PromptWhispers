@@ -7,23 +7,24 @@ import axios from "axios";
 import Header from "./components/Header.tsx";
 import GameHistory from "./components/GameHistory.tsx";
 import GameReply from "./components/GameReply.tsx";
+import LobbyScreen from "./components/LobbyScreen.tsx";
 
 function App() {
   const [user, setUser] = useState<User>(null);
 
-  function getCurrentUser() {
+  const getCurrentUser = () => {
     axios.get<User>("/api/users").then((response) => {
       setUser(response.data);
     });
-  }
+  };
 
   useEffect(() => {
     getCurrentUser();
   }, []);
 
-  function logout() {
+  const logout = () => {
     axios.post("/api/users/logout").then(() => getCurrentUser());
-  }
+  };
 
   return (
     <>
@@ -32,6 +33,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId/" element={<Play />} />
+          <Route
+            path="/lobby/:lobbyId/"
+            element={<LobbyScreen loggedInUser={user} />}
+          />
           <Route path="/games" element={<GameHistory />} />
           <Route path="/games/:gameId/" element={<GameReply />} />
         </Routes>

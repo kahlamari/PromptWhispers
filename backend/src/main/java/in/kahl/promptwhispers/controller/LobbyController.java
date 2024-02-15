@@ -29,16 +29,17 @@ public class LobbyController {
 
     @PutMapping("{id}/join")
     public Lobby joinLobby(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id) {
-        return null; //lobbyService.joinLobby(principal, id);
+        return lobbyService.joinLobby(principal, id);
     }
 
     @PutMapping("{id}/leave")
     public Lobby leaveLobby(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id) {
-        return null; // lobbyService.leaveLobby(principal, id);
+        return lobbyService.leaveLobby(principal, id);
     }
 
     @DeleteMapping("{id}")
-    public Lobby deleteLobby(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id) {
-        return null; //lobbyService.deleteLobby(principal, id);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLobby(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id) {
+        lobbyService.deleteLobby(principal, id);
     }
 }
