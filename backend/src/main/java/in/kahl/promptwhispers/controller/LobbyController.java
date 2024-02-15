@@ -1,11 +1,14 @@
 package in.kahl.promptwhispers.controller;
 
+import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.service.LobbyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/lobbies")
@@ -41,5 +44,11 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLobby(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id) {
         lobbyService.deleteLobby(principal, id);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleLobbyNotFound() {
+        return new ErrorMessage("NoSuchElementException: The lobby of your request does not exist.");
     }
 }
