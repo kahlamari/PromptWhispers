@@ -2,6 +2,7 @@ package in.kahl.promptwhispers.controller;
 
 import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class GameController {
 
     @PostMapping("start")
     @ResponseStatus(HttpStatus.CREATED)
-    public Game createGame(@AuthenticationPrincipal OAuth2User principal) {
+    public GameResponse createGame(@AuthenticationPrincipal OAuth2User principal) {
         return gameService.createGame(principal);
     }
 

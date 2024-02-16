@@ -37,7 +37,7 @@ class GameServiceTest {
     }
 
     @Test
-    void createGameTest_whenGameCreationRequested_thenNewGameReturned() {
+    void createGameTest_whenGameCreationRequested_thenReturnNewGameResponse() {
         // ARRANGE
         Instant time = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");

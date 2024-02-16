@@ -1,25 +1,72 @@
 package in.kahl.promptwhispers.model;
 
+import in.kahl.promptwhispers.model.dto.GameResponse;
 import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public record Game(
         @Id
         String id,
-        List<Step> steps,
-        Instant createdAt,
-        boolean isFinished
+        List<String> players,
+        Map<Integer, List<Step>> rounds,
+        GameState gameState,
+        Instant createdAt
 ) {
-    public Game() {
-        this(UUID.randomUUID().toString(), Collections.emptyList(), Instant.now().truncatedTo(ChronoUnit.MILLIS), false);
+    public Game(User host) {
+        this(UUID.randomUUID().toString(),
+                new ArrayList<>(List.of(host.id())),
+                Collections.emptyMap(),
+                GameState.NEW,
+                Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
+    public GameResponse asGameResponse() {
+        int playerIndex = 0;
+
+        return new GameResponse(
+                id(),
+                rounds().get(playerIndex),
+                createdAt(),
+                gameState() == GameState.FINISHED
+        );
+    }
+
+    public int getLastCompletedStep() {
+        int minStepNumber = players().size() * 2;
+        for (List<Step> steps : rounds().values()) {
+            minStepNumber = Math.min(minStepNumber, steps.size());
+        }
+
+        return minStepNumber;
+    }
+
+    public boolean stepCompleted() {
+        int minStepNumber = getLastCompletedStep();
+        return rounds().values().stream().allMatch(steps -> steps.size() == minStepNumber);
+    }
+
+    public Game withStep(Step step) {
+        int playerIndex = players().indexOf(step.player());
+
+        // first step
+        int offset = playerIndex + getLastCompletedStep();
+
+        ArrayList<Step> updatedSteps = new ArrayList<>(rounds().get(offset));
+        updatedSteps.add(step);
+
+        rounds().put(offset, updatedSteps);
+
+        return new Game(id(),
+                players(),
+                rounds(),
+                gameState(),
+                createdAt());
+    }
+
+    /*
     public static final int MAX_IMAGE_STEPS = 3;
 
     public static boolean maxStepsReached(List<Step> steps) {
@@ -35,4 +82,6 @@ public record Game(
 
         return new Game(id(), stepList, createdAt(), maxStepsReached(stepList));
     }
+    */
+
 }

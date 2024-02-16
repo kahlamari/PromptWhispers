@@ -4,6 +4,7 @@ import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Step;
 import in.kahl.promptwhispers.model.StepType;
 import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.security.access.AccessDeniedException;
@@ -30,12 +31,12 @@ public class GameService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public Game createGame(OAuth2User principle) {
-        User user = userService.getLoggedInUser(principle);
-        Game newGame = gameRepo.save(new Game());
-        User userWithGame = user.withGame(newGame);
-        userService.save(userWithGame);
-        return newGame;
+    public GameResponse createGame(OAuth2User principal) {
+        User user = userService.getLoggedInUser(principal);
+        Game newGame = gameRepo.save(new Game(user));
+        userService.save(user.withGame(newGame));
+
+        return newGame.asGameResponse();
     }
 
     public Game getGameById(String id) {
@@ -84,7 +85,7 @@ public class GameService {
     public Game generateImage(String gameId) {
         Game game = getGameById(gameId);
 
-        Step prompt = getMostRecentPrompt(game.steps());
+        Step prompt = getMostRecentPrompt(game.rounds().get(0));
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
