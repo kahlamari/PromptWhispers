@@ -10,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -44,14 +45,20 @@ public class GameService {
 
     public List<Game> getGamesByUser(OAuth2User principal) {
         User user = userService.getLoggedInUser(principal);
-        return userService.getAllGames(user.id());
+        List<String> gameIds = userService.getAllGameIds(user.id());
+
+        if (gameIds == null || gameIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return gameRepo.findAllById(gameIds);
     }
 
     public void deleteGame(OAuth2User principal, String gameId) {
         User user = userService.getLoggedInUser(principal);
         Game game = getGameById(gameId);
 
-        if (user.games().contains(game)) {
+        if (user.gameIds().contains(game.id())) {
             userService.removeGame(user, game);
             gameRepo.delete(game);
         } else {
