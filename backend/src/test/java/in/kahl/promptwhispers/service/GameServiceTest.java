@@ -35,6 +35,10 @@ class GameServiceTest {
         serviceUnderTest = new GameService(gameRepo, userService, lobbyService, dalleService, cloudinaryService);
     }
 
+    private Game createEmptyGame() {
+        return new Game(new User(userEmail));
+    }
+
     @Test
     void createGameTest_whenGameCreationRequested_thenReturnNewGameResponse() {
         // ARRANGE
@@ -67,7 +71,7 @@ class GameServiceTest {
     @Test
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
-        Optional<Game> expectedGame = Optional.of(new Game(null));
+        Optional<Game> expectedGame = Optional.of(createEmptyGame());
         when(gameRepo.findById(expectedGame.get().id())).thenReturn(expectedGame);
 
         // ACT
@@ -95,11 +99,11 @@ class GameServiceTest {
     @Test
     void deleteGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
-        Game testGameToDelete = new Game(null);
-        Game testGameToKeep = new Game(null);
+        User user = new User(userEmail);
+        Game testGameToDelete = new Game(user);
+        Game testGameToKeep = new Game(user);
 
-        User userExpected = new User(userEmail)
-                .withGame(testGameToDelete);
+        User userExpected = user.withGame(testGameToDelete);
 
         User testUser = userExpected
                 .withGame(testGameToKeep);
@@ -128,10 +132,10 @@ class GameServiceTest {
     @Test
     void deleteGameTest_whenUserDoesNotOwnGame_thenThrowException() {
         // ARRANGE
-        Game testGameToDelete = new Game(null);
-        Game testGameToKeep = new Game(null);
-        User testUser = new User(userEmail)
-                .withGame(testGameToKeep);
+        User testUser = new User(userEmail);
+        Game testGameToDelete = new Game(testUser);
+        Game testGameToKeep = new Game(testUser);
+        testUser = testUser.withGame(testGameToKeep);
 
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
@@ -155,7 +159,7 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
-            Optional<Game> gameWithOutPrompt = Optional.of(new Game(null));
+            Optional<Game> gameWithOutPrompt = Optional.of(createEmptyGame());
             String gameId = gameWithOutPrompt.get().id();
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
