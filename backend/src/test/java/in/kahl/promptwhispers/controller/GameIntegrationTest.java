@@ -174,9 +174,9 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isNoContent());
 
-        List<Game> gameListActual = userRepo.getUserByEmail(userEmail).games();
+        List<String> gameListActual = userRepo.getUserByEmail(userEmail).gameIds();
 
-        assertEquals(List.of(game2), gameListActual);
+        assertEquals(List.of(game2.id()), gameListActual);
         assertEquals(1, gameListActual.size());
     }
 

@@ -66,8 +66,8 @@ public class UserService {
         return true;
     }
 
-    public List<Game> getAllGames(String userId) {
-        return userRepo.findById(userId).orElseThrow(NoSuchElementException::new).games();
+    public List<String> getAllGameIds(String userId) {
+        return userRepo.findById(userId).orElseThrow(NoSuchElementException::new).gameIds();
     }
 
     public User removeGame(User user, Game game) {
