@@ -1,9 +1,6 @@
 package in.kahl.promptwhispers.service;
 
-import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.Step;
-import in.kahl.promptwhispers.model.StepType;
-import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.model.*;
 import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
@@ -21,13 +18,16 @@ public class GameService {
 
     private final UserService userService;
 
+    private final LobbyService lobbyService;
+
     private final DalleService dalleService;
 
     private final CloudinaryService cloudinaryService;
 
-    public GameService(GameRepo gameRepo, UserService userService, DalleService dalleService, CloudinaryService cloudinaryService) {
+    public GameService(GameRepo gameRepo, UserService userService, LobbyService lobbyService, DalleService dalleService, CloudinaryService cloudinaryService) {
         this.gameRepo = gameRepo;
         this.userService = userService;
+        this.lobbyService = lobbyService;
         this.dalleService = dalleService;
         this.cloudinaryService = cloudinaryService;
     }
@@ -40,8 +40,17 @@ public class GameService {
         return newGame.asGameResponse();
     }
 
-    public Game getGameById(String id) {
-        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
+    public GameResponse createGame(OAuth2User principal, Lobby lobby) {
+        User user = userService.getLoggedInUser(principal);
+        Game newGame = gameRepo.save(new Game(user));
+        userService.save(user.withGame(newGame));
+        lobbyService.update(lobby.withGameId(newGame.id()));
+
+        return newGame.asGameResponse();
+    }
+
+    public GameResponse getGameById(String id) {
+        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asGameResponse();
     }
 
     public List<Game> getGamesByUser(OAuth2User principal) {
@@ -57,7 +66,7 @@ public class GameService {
 
     public void deleteGame(OAuth2User principal, String gameId) {
         User user = userService.getLoggedInUser(principal);
-        Game game = getGameById(gameId);
+        Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         if (user.gameIds().contains(game.id())) {
             userService.removeGame(user, game);
@@ -83,14 +92,14 @@ public class GameService {
     public Game submitPrompt(String gameId, PromptCreate promptCreate) {
         Step newPrompt = promptCreate.makeIntoPrompt();
 
-        Game game = getGameById(gameId);
+        Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
         Game gameWithPrompt = game.withStep(newPrompt);
 
         return gameRepo.save(gameWithPrompt);
     }
 
     public Game generateImage(String gameId) {
-        Game game = getGameById(gameId);
+        Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         Step prompt = getMostRecentPrompt(game.rounds().get(0));
 

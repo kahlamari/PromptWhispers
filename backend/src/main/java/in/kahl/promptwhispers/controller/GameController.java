@@ -2,6 +2,7 @@ package in.kahl.promptwhispers.controller;
 
 import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.service.GameService;
@@ -28,8 +29,14 @@ public class GameController {
         return gameService.createGame(principal);
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public GameResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
+        return gameService.createGame(principal, lobby);
+    }
+
     @GetMapping("{gameId}")
-    public Game getGame(@PathVariable String gameId) {
+    public GameResponse getGame(@PathVariable String gameId) {
         return gameService.getGameById(gameId);
     }
 

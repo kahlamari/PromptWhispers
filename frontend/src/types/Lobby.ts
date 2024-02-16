@@ -4,6 +4,7 @@ export type Lobby = {
   id: string;
   host: User;
   players: User[];
+  gameId: string;
   isGameStarted: boolean;
   isGameFinished: boolean;
   createdAt: Date;

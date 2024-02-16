@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        Game gameExpected = objectMapper.readValue(saveArrangeResult, Game.class);
+        GameResponse gameExpected = objectMapper.readValue(saveArrangeResult, GameResponse.class);
 
         // ACT
         String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.id())
@@ -85,7 +86,7 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        Game game = objectMapper.readValue(saveResult, Game.class);
+        GameResponse game = objectMapper.readValue(saveResult, GameResponse.class);
         assertEquals(gameExpected.id(), game.id());
         assertEquals(gameExpected.steps(), game.steps());
         assertEquals(gameExpected.isFinished(), game.isFinished());

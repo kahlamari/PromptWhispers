@@ -32,6 +32,10 @@ public class LobbyService {
         User user = userService.getLoggedInUser(principal);
         Lobby lobby = getLobbyById(id);
 
+        if (lobby.host().equals(user)) {
+            return lobby;
+        }
+
         lobby.players().add(user);
         return lobbyRepo.save(lobby);
     }
@@ -57,5 +61,9 @@ public class LobbyService {
         } else {
             throw new AccessDeniedException("You are not allowed to delete this lobby.");
         }
+    }
+
+    public void update(Lobby lobby) {
+        lobbyRepo.save(lobby);
     }
 }

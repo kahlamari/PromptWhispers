@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
+import { Game } from "../types/Game.ts";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -12,25 +13,36 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   const params = useParams();
   const lobbyId: string | undefined = params.lobbyId;
   const [lobby, setLobby] = useState<Lobby | undefined | null>(undefined);
+  const navigate = useNavigate();
 
   const getLobby = (lobbyId: string) => {
     axios.get<Lobby>(`/api/lobbies/${lobbyId}`).then((response) => {
-      setLobby(response.data);
+      const lobbyData: Lobby = response.data;
+      setLobby(lobbyData);
+      if (lobbyData.isGameStarted) {
+        navigate(`/play/${lobbyData.gameId}`);
+      }
     });
   };
 
   const joinLobby = () => {
     if (!lobbyId) return null;
-    axios.put(`/api/lobbies/${lobbyId}/join`).then(() => getLobby(lobbyId));
+    axios
+      .put<Lobby>(`/api/lobbies/${lobbyId}/join`)
+      .then(() => getLobby(lobbyId));
   };
 
   const leaveLobby = () => {
     if (!lobbyId) return null;
-    axios.put(`/api/lobbies/${lobbyId}/leave`).then(() => getLobby(lobbyId));
+    axios
+      .put<Lobby>(`/api/lobbies/${lobbyId}/leave`)
+      .then(() => getLobby(lobbyId));
   };
 
   const startGame = () => {
-    console.log("Start Game clicked! Implementation follows");
+    axios
+      .post<Game>(`/api/games`, lobby)
+      .then((response) => navigate(`/play/${response.data.id}`));
   };
 
   useEffect(() => {

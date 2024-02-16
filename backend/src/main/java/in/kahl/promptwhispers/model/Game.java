@@ -2,6 +2,7 @@ package in.kahl.promptwhispers.model;
 
 import in.kahl.promptwhispers.model.dto.GameResponse;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -10,14 +11,15 @@ import java.util.*;
 public record Game(
         @Id
         String id,
-        List<String> players,
+        @DBRef
+        List<User> players,
         Map<Integer, List<Step>> rounds,
         GameState gameState,
         Instant createdAt
 ) {
     public Game(User host) {
         this(UUID.randomUUID().toString(),
-                new ArrayList<>(List.of(host.id())),
+                new ArrayList<>(List.of(host)),
                 Collections.emptyMap(),
                 GameState.NEW,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
@@ -28,7 +30,7 @@ public record Game(
 
         return new GameResponse(
                 id(),
-                rounds().get(playerIndex),
+                rounds().get(playerIndex) == null ? Collections.emptyList() : rounds().get(playerIndex),
                 createdAt(),
                 gameState() == GameState.FINISHED
         );

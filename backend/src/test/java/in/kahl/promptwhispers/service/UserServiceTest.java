@@ -150,8 +150,8 @@ class UserServiceTest {
     @Test
     void getAllGamesTest_whenGamesExists_thenReturnGames() {
         // ARRANGE
-        Game testGame1 = new Game();
-        Game testGame2 = new Game();
+        Game testGame1 = new Game(null);
+        Game testGame2 = new Game(null);
         User testUser = new User(userEmail)
                 .withGame(testGame1)
                 .withGame(testGame2);
@@ -179,8 +179,8 @@ class UserServiceTest {
     @Test
     void removeGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
-        Game testGame1 = new Game();
-        Game testGameToDelete = new Game();
+        Game testGame1 = new Game(null);
+        Game testGameToDelete = new Game(null);
         User userExpected = new User(userEmail)
                 .withGame(testGame1);
 

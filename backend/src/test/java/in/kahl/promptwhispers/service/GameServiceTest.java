@@ -1,9 +1,7 @@
 package in.kahl.promptwhispers.service;
 
-import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.Step;
-import in.kahl.promptwhispers.model.StepType;
-import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.model.*;
+import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +23,7 @@ import static org.mockito.Mockito.*;
 class GameServiceTest {
     private final GameRepo gameRepo = mock(GameRepo.class);
     private final UserService userService = mock(UserService.class);
+    private final LobbyService lobbyService = mock(LobbyService.class);
     private final DalleService dalleService = mock(DalleService.class);
     private final CloudinaryService cloudinaryService = mock(CloudinaryService.class);
 
@@ -33,7 +32,7 @@ class GameServiceTest {
 
     @BeforeEach
     void setUp() {
-        serviceUnderTest = new GameService(gameRepo, userService, dalleService, cloudinaryService);
+        serviceUnderTest = new GameService(gameRepo, userService, lobbyService, dalleService, cloudinaryService);
     }
 
     @Test
@@ -51,18 +50,15 @@ class GameServiceTest {
             User testUser = new User(userEmail);
             when(userService.getLoggedInUser(oAuth2User)).thenReturn(testUser);
 
-            Game expected = new Game("00000000-0000-0000-0000-000000000000",
-                    Collections.emptyList(),
-                    time,
-                    false);
+            Game expected = new Game(testUser);
 
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            Game actual = serviceUnderTest.createGame(oAuth2User);
+            GameResponse actual = serviceUnderTest.createGame(oAuth2User);
 
             // ASSERT
-            assertEquals(expected, actual);
+            assertEquals(expected.asGameResponse(), actual);
             verify(gameRepo).save(expected);
             verifyNoMoreInteractions(gameRepo);
         }
@@ -71,16 +67,15 @@ class GameServiceTest {
     @Test
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
-        String id = "1";
-        Optional<Game> expectedGame = Optional.of(new Game(id, Collections.emptyList(), Instant.now(), false));
-        when(gameRepo.findById(id)).thenReturn(expectedGame);
+        Optional<Game> expectedGame = Optional.of(new Game(null));
+        when(gameRepo.findById(expectedGame.get().id())).thenReturn(expectedGame);
 
         // ACT
-        Game actualGame = serviceUnderTest.getGameById(id);
+        GameResponse actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
 
         // ASSERT
-        assertEquals(expectedGame.get(), actualGame);
-        verify(gameRepo).findById(id);
+        assertEquals(expectedGame.get().asGameResponse(), actualGame);
+        verify(gameRepo).findById(expectedGame.get().id());
         verifyNoMoreInteractions(gameRepo);
     }
 
@@ -100,8 +95,8 @@ class GameServiceTest {
     @Test
     void deleteGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
-        Game testGameToDelete = new Game();
-        Game testGameToKeep = new Game();
+        Game testGameToDelete = new Game(null);
+        Game testGameToKeep = new Game(null);
 
         User userExpected = new User(userEmail)
                 .withGame(testGameToDelete);
@@ -133,8 +128,8 @@ class GameServiceTest {
     @Test
     void deleteGameTest_whenUserDoesNotOwnGame_thenThrowException() {
         // ARRANGE
-        Game testGameToDelete = new Game();
-        Game testGameToKeep = new Game();
+        Game testGameToDelete = new Game(null);
+        Game testGameToKeep = new Game(null);
         User testUser = new User(userEmail)
                 .withGame(testGameToKeep);
 
@@ -160,15 +155,17 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
-            String gameId = "1";
-            Optional<Game> gameWithOutPrompt = Optional.of(new Game(gameId, Collections.emptyList(), time, false));
+            Optional<Game> gameWithOutPrompt = Optional.of(new Game(null));
+            String gameId = gameWithOutPrompt.get().id();
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
             String promptInput = "Sheep jumps over hedge";
 
             Game expectedGameWithPrompt = new Game(gameId,
-                    List.of(new Step(StepType.PROMPT, promptInput)),
-                    time, false);
+                    gameWithOutPrompt.get().players(),
+                    Map.of(0, List.of(new Step(StepType.PROMPT, promptInput))),
+                    gameWithOutPrompt.get().gameState(),
+                    gameWithOutPrompt.get().createdAt());
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
 
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
@@ -198,7 +195,7 @@ class GameServiceTest {
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
             Step prompt = new Step(StepType.PROMPT, promptInput);
-            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, List.of(prompt), time, false));
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, null, Map.of(0, List.of(prompt)), GameState.IMAGE_PHASE, time));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
             String imageUrl = "https://example.com/image.png";
@@ -206,8 +203,8 @@ class GameServiceTest {
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
             Step generatedImage = new Step(StepType.IMAGE, imageUrl);
-            Game gameWithImageUrl = new Game(gameId,
-                    List.of(prompt, generatedImage), time, false);
+            Game gameWithImageUrl = new Game(gameId, null,
+                    Map.of(0, List.of(prompt, generatedImage)), GameState.PROMPT_PHASE, time);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
             // ACT
@@ -228,9 +225,10 @@ class GameServiceTest {
         // ARRANGE
         String gameId = "1";
         Optional<Game> gameWith3Images = Optional.of(new Game(gameId,
-                Collections.emptyList(),
-                Instant.now(),
-                true));
+                null,
+                Collections.emptyMap(),
+                GameState.FINISHED,
+                Instant.now()));
         when(gameRepo.findById(gameId)).thenReturn(gameWith3Images);
 
         String promptInput = "Sheep jumps over hedge";
