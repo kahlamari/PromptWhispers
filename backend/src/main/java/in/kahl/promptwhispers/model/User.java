@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public record User(
@@ -17,7 +18,7 @@ public record User(
         Instant createdAt
 ) {
     public User(String email) {
-        this(UUID.randomUUID().toString(), email, Collections.emptyList(), AuthProvider.GOOGLE, Instant.now());
+        this(UUID.randomUUID().toString(), email, Collections.emptyList(), AuthProvider.GOOGLE, Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     public User withGames(List<Game> gamesList) {

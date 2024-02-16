@@ -5,7 +5,6 @@ import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -59,11 +58,5 @@ public class GameController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage handleGameNotFound() {
         return new ErrorMessage("NoSuchElementException: The game associated with your request does not exist.");
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage handleAccessDenied(AccessDeniedException ex) {
-        return new ErrorMessage("AccessDeniedException: " + ex.getMessage());
     }
 }
