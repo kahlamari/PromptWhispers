@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -51,7 +52,7 @@ public class GameService {
             return Collections.emptyList();
         }
 
-        return gameRepo.findAllById(gameIds);
+        return gameRepo.findAllById(gameIds).stream().sorted(Comparator.comparing(Game::createdAt)).toList();
     }
 
     public void deleteGame(OAuth2User principal, String gameId) {
