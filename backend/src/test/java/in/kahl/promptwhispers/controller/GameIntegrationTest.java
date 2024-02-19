@@ -72,7 +72,7 @@ class GameIntegrationTest {
         RoundResponse gameExpected = objectMapper.readValue(saveArrangeResult, RoundResponse.class);
 
         // ACT
-        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.id())
+        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.gameId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
 
