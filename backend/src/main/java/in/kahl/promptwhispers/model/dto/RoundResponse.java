@@ -2,13 +2,11 @@ package in.kahl.promptwhispers.model.dto;
 
 import in.kahl.promptwhispers.model.Turn;
 
-import java.time.Instant;
 import java.util.List;
 
-public record GameResponse(
-        String id,
+public record RoundResponse(
+        String gameId,
         List<Turn> turns,
-        Instant createdAt,
-        boolean isFinished
+        boolean isGameFinished
 ) {
 }

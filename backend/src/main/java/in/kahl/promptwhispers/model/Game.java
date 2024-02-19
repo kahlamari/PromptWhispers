@@ -1,6 +1,6 @@
 package in.kahl.promptwhispers.model;
 
-import in.kahl.promptwhispers.model.dto.GameResponse;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
@@ -25,13 +25,12 @@ public record Game(
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
-    public GameResponse asGameResponse() {
+    public RoundResponse asRoundResponse() {
         int playerIndex = 0;
 
-        return new GameResponse(
+        return new RoundResponse(
                 id(),
                 rounds().get(playerIndex) == null ? Collections.emptyList() : rounds().get(playerIndex),
-                createdAt(),
                 gameState() == GameState.FINISHED
         );
     }

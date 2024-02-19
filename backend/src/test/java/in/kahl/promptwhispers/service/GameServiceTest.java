@@ -1,8 +1,8 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.*;
-import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,10 +59,10 @@ class GameServiceTest {
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            GameResponse actual = serviceUnderTest.createGame(oAuth2User);
+            RoundResponse actual = serviceUnderTest.createGame(oAuth2User);
 
             // ASSERT
-            assertEquals(expected.asGameResponse(), actual);
+            assertEquals(expected.asRoundResponse(), actual);
             verify(gameRepo).save(expected);
             verifyNoMoreInteractions(gameRepo);
         }
@@ -75,10 +75,10 @@ class GameServiceTest {
         when(gameRepo.findById(expectedGame.get().id())).thenReturn(expectedGame);
 
         // ACT
-        GameResponse actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
+        RoundResponse actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
 
         // ASSERT
-        assertEquals(expectedGame.get().asGameResponse(), actualGame);
+        assertEquals(expectedGame.get().asRoundResponse(), actualGame);
         verify(gameRepo).findById(expectedGame.get().id());
         verifyNoMoreInteractions(gameRepo);
     }

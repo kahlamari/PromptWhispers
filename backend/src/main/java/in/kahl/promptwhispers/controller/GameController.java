@@ -3,8 +3,8 @@ package in.kahl.promptwhispers.controller;
 import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Lobby;
-import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,18 +25,18 @@ public class GameController {
 
     @PostMapping("start")
     @ResponseStatus(HttpStatus.CREATED)
-    public GameResponse createGame(@AuthenticationPrincipal OAuth2User principal) {
+    public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal) {
         return gameService.createGame(principal);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GameResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
+    public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
         return gameService.createGame(principal, lobby);
     }
 
     @GetMapping("{gameId}")
-    public GameResponse getGame(@PathVariable String gameId) {
+    public RoundResponse getGame(@PathVariable String gameId) {
         return gameService.getGameById(gameId);
     }
 

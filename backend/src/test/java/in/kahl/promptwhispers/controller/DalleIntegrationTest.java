@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Turn;
 import in.kahl.promptwhispers.model.User;
-import in.kahl.promptwhispers.model.dto.GameResponse;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -141,7 +141,7 @@ public class DalleIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        GameResponse gameActual = objectMapper.readValue(resultJSON, GameResponse.class);
+        RoundResponse gameActual = objectMapper.readValue(resultJSON, RoundResponse.class);
         Turn imageTurn = gameActual.turns().getLast();
 
         assertEquals(game.id(), gameActual.id());

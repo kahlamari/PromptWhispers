@@ -1,8 +1,8 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.*;
-import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -33,25 +33,25 @@ public class GameService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public GameResponse createGame(OAuth2User principal) {
+    public RoundResponse createGame(OAuth2User principal) {
         User user = userService.getLoggedInUser(principal);
         Game newGame = gameRepo.save(new Game(user));
         userService.save(user.withGame(newGame));
 
-        return newGame.asGameResponse();
+        return newGame.asRoundResponse();
     }
 
-    public GameResponse createGame(OAuth2User principal, Lobby lobby) {
+    public RoundResponse createGame(OAuth2User principal, Lobby lobby) {
         User user = userService.getLoggedInUser(principal);
         Game newGame = gameRepo.save(new Game(user));
         userService.save(user.withGame(newGame));
         lobbyService.update(lobby.withGameId(newGame.id()));
 
-        return newGame.asGameResponse();
+        return newGame.asRoundResponse();
     }
 
-    public GameResponse getGameById(String id) {
-        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asGameResponse();
+    public RoundResponse getGameById(String id) {
+        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asRoundResponse();
     }
 
     public List<Game> getGamesByUser(OAuth2User principal) {
