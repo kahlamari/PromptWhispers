@@ -5,7 +5,10 @@ import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public record User(
         @Id
@@ -24,7 +27,10 @@ public record User(
     }
 
     public User withGame(Game game) {
-        List<String> updatedGames = new LinkedList<>(gameIds());
+        List<String> updatedGames = new ArrayList<>();
+        if (gameIds() != null) {
+            updatedGames.addAll(gameIds());
+        }
         updatedGames.add(game.id());
         return withGames(updatedGames);
     }
