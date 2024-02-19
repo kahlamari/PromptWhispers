@@ -144,7 +144,7 @@ public class DalleIntegrationTest {
         RoundResponse gameActual = objectMapper.readValue(resultJSON, RoundResponse.class);
         Turn imageTurn = gameActual.turns().getLast();
 
-        assertEquals(game.id(), gameActual.id());
+        assertEquals(game.id(), gameActual.gameId());
         assertEquals(imageUrl, imageTurn.content());
         assertTrue(Instant.now().minusSeconds(10L).isBefore(imageTurn.createdAt()));
     }
