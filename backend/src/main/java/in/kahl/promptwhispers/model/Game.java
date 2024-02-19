@@ -37,7 +37,7 @@ public record Game(
 
     public RoundResponse asRoundResponse(User player) {
         int playerIndex = players().indexOf(player);
-        int imageTurns = getLastCompletedImageTurn();
+        int imageTurns = getNumOfCompletedImageTurns();
 
         int roundOfPlayer = (playerIndex + imageTurns) % players().size();
 
@@ -56,7 +56,7 @@ public record Game(
         return new Game(id(), players(), rounds(), gameState(), createdAt());
     }
 
-    public int getLastCompletedImageTurn() {
+    private int getNumOfCompletedImageTurns() {
         int minTurnNumber = players().size();
 
         for (List<Turn> turns : rounds.values()) {
@@ -66,7 +66,11 @@ public record Game(
         return minTurnNumber;
     }
 
-    public int getLastCompletedTurn() {
+    private boolean isGameFinished() {
+        return getNumOfCompletedImageTurns() >= players().size();
+    }
+
+    private int getNumOfCompletedTurns() {
         int minTurnNumber = players().size() * 2;
         for (List<Turn> turns : rounds().values()) {
             minTurnNumber = Math.min(minTurnNumber, turns.size());
@@ -76,16 +80,39 @@ public record Game(
     }
 
     public boolean turnCompleted() {
-        int minTurnNumber = getLastCompletedTurn();
+        int minTurnNumber = getNumOfCompletedTurns();
         return rounds().values().stream().allMatch(steps -> steps.size() == minTurnNumber);
+    }
+
+    private GameState determineGameState() {
+        if (isGameFinished()) {
+            return GameState.FINISHED;
+        }
+
+        if (gameState().equals(GameState.NEW)) {
+            return GameState.PROMPT_PHASE;
+        }
+
+        if (gameState().equals(GameState.PROMPT_PHASE)) {
+            if (turnCompleted()) {
+                return GameState.IMAGE_PHASE;
+            }
+            return gameState();
+        }
+
+        if (gameState().equals(GameState.IMAGE_PHASE)) {
+            if (turnCompleted()) {
+                return GameState.PROMPT_PHASE;
+            }
+            return gameState();
+        }
+        return gameState();
     }
 
     public Game withTurn(Turn turn) {
         int playerIndex = players().indexOf(turn.player());
 
-        // first step
-        int offset = (playerIndex + getLastCompletedImageTurn()) % players().size();
-        System.out.println("offset: " + offset);
+        int offset = (playerIndex + getNumOfCompletedImageTurns()) % players().size();
 
         List<Turn> updatedTurns = new ArrayList<>();
         if (rounds().get(offset) != null) {
@@ -98,7 +125,7 @@ public record Game(
         return new Game(id(),
                 players(),
                 rounds(),
-                gameState(),
+                determineGameState(),
                 createdAt());
     }
 }

@@ -47,7 +47,6 @@ public class GameService {
             userService.save(player.withGameId(newGame.id()));
         }
 
-
         newGame = gameRepo.save(newGame);
         lobbyService.update(lobby.withGameId(newGame.id()));
 
