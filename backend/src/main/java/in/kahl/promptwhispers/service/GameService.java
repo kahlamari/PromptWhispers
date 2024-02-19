@@ -1,8 +1,8 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.Step;
-import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.Turn;
+import in.kahl.promptwhispers.model.TurnType;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
@@ -67,24 +67,24 @@ public class GameService {
         }
     }
 
-    private static Step getMostRecentPrompt(List<Step> steps) {
-        if (steps.isEmpty()) {
+    private static Turn getMostRecentPrompt(List<Turn> turns) {
+        if (turns.isEmpty()) {
             throw new NoSuchElementException();
         }
 
-        Step step = steps.getLast();
+        Turn turn = turns.getLast();
 
-        if (step.type().equals(StepType.PROMPT)) {
-            return step;
+        if (turn.type().equals(TurnType.PROMPT)) {
+            return turn;
         }
         throw new NoSuchElementException();
     }
 
     public Game submitPrompt(String gameId, PromptCreate promptCreate) {
-        Step newPrompt = promptCreate.makeIntoPrompt();
+        Turn newPrompt = promptCreate.makeIntoPrompt();
 
         Game game = getGameById(gameId);
-        Game gameWithPrompt = game.withStep(newPrompt);
+        Game gameWithPrompt = game.withTurn(newPrompt);
 
         return gameRepo.save(gameWithPrompt);
     }
@@ -92,12 +92,12 @@ public class GameService {
     public Game generateImage(String gameId) {
         Game game = getGameById(gameId);
 
-        Step prompt = getMostRecentPrompt(game.steps());
+        Turn prompt = getMostRecentPrompt(game.turns());
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
-        Step generatedImage = new Step(StepType.IMAGE, imageUrl);
-        Game gameWithImage = game.withStep(generatedImage);
+        Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
+        Game gameWithImage = game.withTurn(generatedImage);
 
         return gameRepo.save(gameWithImage);
     }

@@ -3,7 +3,7 @@ import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Game } from "../types/Game.ts";
-import { Step } from "../types/Step.ts";
+import { Turn } from "../types/Turn.ts";
 
 export default function Play() {
   const params = useParams();
@@ -68,13 +68,13 @@ export default function Play() {
       });
   };
 
-  const getLastImage = (): Step | undefined => {
+  const getLastImage = (): Turn | undefined => {
     if (game) {
       // Due to the game's logic there needs to be a prompt before there can be an image
-      if (game.steps.length < 2) {
+      if (game.turns.length < 2) {
         return undefined;
       }
-      const lastStep: Step = game.steps[game.steps.length - 1];
+      const lastStep: Turn = game.turns[game.turns.length - 1];
       if (lastStep.type === "IMAGE") {
         return lastStep;
       }

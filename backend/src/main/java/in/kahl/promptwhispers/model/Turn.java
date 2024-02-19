@@ -5,14 +5,14 @@ import org.springframework.data.annotation.Id;
 import java.time.Instant;
 import java.util.UUID;
 
-public record Step(
+public record Turn(
         @Id
         String id,
-        StepType type,
+        TurnType type,
         String content,
         Instant createdAt
 ) {
-    public Step(StepType type, String content) {
+    public Turn(TurnType type, String content) {
         this(UUID.randomUUID().toString(), type, content, Instant.now());
     }
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
 public record Game(
         @Id
         String id,
-        List<Step> steps,
+        List<Turn> turns,
         Instant createdAt,
         boolean isFinished
 ) {
@@ -22,17 +22,17 @@ public record Game(
 
     public static final int MAX_IMAGE_STEPS = 3;
 
-    public static boolean maxStepsReached(List<Step> steps) {
-        return steps.stream().filter(step -> step.type().equals(StepType.IMAGE)).count() >= MAX_IMAGE_STEPS;
+    public static boolean maxStepsReached(List<Turn> turns) {
+        return turns.stream().filter(step -> step.type().equals(TurnType.IMAGE)).count() >= MAX_IMAGE_STEPS;
     }
 
-    public Game withStep(Step step) {
+    public Game withTurn(Turn turn) {
         if (isFinished()) {
             throw new IllegalArgumentException("Game is finished. Not steps can be added.");
         }
-        List<Step> stepList = new LinkedList<>(steps());
-        stepList.addLast(step);
+        List<Turn> turnList = new LinkedList<>(turns());
+        turnList.addLast(turn);
 
-        return new Game(id(), stepList, createdAt(), maxStepsReached(stepList));
+        return new Game(id(), turnList, createdAt(), maxStepsReached(turnList));
     }
 }
