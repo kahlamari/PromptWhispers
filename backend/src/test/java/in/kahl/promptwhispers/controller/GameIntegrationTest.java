@@ -87,9 +87,9 @@ class GameIntegrationTest {
                 .getContentAsString();
 
         RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
-        assertEquals(gameExpected.id(), game.id());
+        assertEquals(gameExpected.gameId(), game.gameId());
         assertEquals(gameExpected.turns(), game.turns());
-        assertEquals(gameExpected.isFinished(), game.isFinished());
+        assertEquals(gameExpected.isGameFinished(), game.isGameFinished());
     }
 
     @Test
