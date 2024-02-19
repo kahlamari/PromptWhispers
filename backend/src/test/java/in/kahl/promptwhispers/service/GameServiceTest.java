@@ -159,6 +159,10 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
+            OAuth2User mockedPrincipal = mock(OAuth2User.class);
+            User testUser = new User(userEmail);
+            when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
             Optional<Game> gameWithOutPrompt = Optional.of(createEmptyGame());
             String gameId = gameWithOutPrompt.get().id();
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
@@ -175,10 +179,10 @@ class GameServiceTest {
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
             // ACT
-            Game actualGameWithPrompt = serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+            RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
             // ASSERT
-            assertEquals(expectedGameWithPrompt, actualGameWithPrompt);
+            assertEquals(expectedGameWithPrompt.asRoundResponse(), actualRoundWithPrompt);
             verify(gameRepo).findById(gameId);
             verify(gameRepo).save(expectedGameWithPrompt);
             verifyNoMoreInteractions(gameRepo);
@@ -212,10 +216,10 @@ class GameServiceTest {
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
             // ACT
-            Game gameActual = serviceUnderTest.generateImage(gameId);
+            RoundResponse roundResponseActual = serviceUnderTest.generateImage(gameId);
 
             // ASSERT
-            assertEquals(gameWithImageUrl, gameActual);
+            assertEquals(gameWithImageUrl.asRoundResponse(), roundResponseActual);
             verify(gameRepo).findById(gameId);
             verify(gameRepo).save(gameWithImageUrl);
             verifyNoMoreInteractions(gameRepo);
@@ -235,11 +239,15 @@ class GameServiceTest {
                 Instant.now()));
         when(gameRepo.findById(gameId)).thenReturn(gameWith3Images);
 
+        OAuth2User mockedPrincipal = mock(OAuth2User.class);
+        User testUser = new User(userEmail);
+        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
         String promptInput = "Sheep jumps over hedge";
         PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
         // ACT
-        Executable executable = () -> serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+        Executable executable = () -> serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
         // ASSERT
         assertThrows(IllegalArgumentException.class, executable);

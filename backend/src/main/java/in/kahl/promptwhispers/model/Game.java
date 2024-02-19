@@ -36,12 +36,12 @@ public record Game(
     }
 
     public int getLastCompletedTurn() {
-        int minStepNumber = players().size() * 2;
-        for (List<Turn> steps : rounds().values()) {
-            minStepNumber = Math.min(minStepNumber, steps.size());
+        int minTurnNumber = players().size() * 2;
+        for (List<Turn> turns : rounds().values()) {
+            minTurnNumber = Math.min(minTurnNumber, turns.size());
         }
 
-        return minStepNumber;
+        return minTurnNumber;
     }
 
     public boolean turnCompleted() {

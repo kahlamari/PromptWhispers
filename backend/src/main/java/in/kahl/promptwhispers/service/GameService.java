@@ -90,16 +90,17 @@ public class GameService {
         throw new NoSuchElementException();
     }
 
-    public Game submitPrompt(String gameId, PromptCreate promptCreate) {
-        Turn newPrompt = promptCreate.makeIntoPrompt();
-
+    public RoundResponse submitPrompt(OAuth2User principal, String gameId, PromptCreate promptCreate) {
+        User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
+
+        Turn newPrompt = promptCreate.asNewPromptTurn().withPlayer(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
-        return gameRepo.save(gameWithPrompt);
+        return gameRepo.save(gameWithPrompt).asRoundResponse();
     }
 
-    public Game generateImage(String gameId) {
+    public RoundResponse generateImage(String gameId) {
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         Turn prompt = getMostRecentPrompt(game.rounds().get(0));
@@ -109,6 +110,6 @@ public class GameService {
         Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
         Game gameWithImage = game.withTurn(generatedImage);
 
-        return gameRepo.save(gameWithImage);
+        return gameRepo.save(gameWithImage).asRoundResponse();
     }
 }
