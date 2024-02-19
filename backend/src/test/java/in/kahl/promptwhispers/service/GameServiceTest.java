@@ -167,7 +167,7 @@ class GameServiceTest {
 
             Game expectedGameWithPrompt = new Game(gameId,
                     gameWithOutPrompt.get().players(),
-                    Map.of(0, List.of(new Step(StepType.PROMPT, promptInput))),
+                    Map.of(0, List.of(new Turn(TurnType.PROMPT, promptInput))),
                     gameWithOutPrompt.get().gameState(),
                     gameWithOutPrompt.get().createdAt());
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
@@ -198,7 +198,7 @@ class GameServiceTest {
 
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
-            Step prompt = new Step(StepType.PROMPT, promptInput);
+            Turn prompt = new Turn(TurnType.PROMPT, promptInput);
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, null, Map.of(0, List.of(prompt)), GameState.IMAGE_PHASE, time));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
@@ -206,7 +206,7 @@ class GameServiceTest {
             when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
-            Step generatedImage = new Step(StepType.IMAGE, imageUrl);
+            Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
             Game gameWithImageUrl = new Game(gameId, null,
                     Map.of(0, List.of(prompt, generatedImage)), GameState.PROMPT_PHASE, time);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);

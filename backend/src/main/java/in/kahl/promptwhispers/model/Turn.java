@@ -1,22 +1,21 @@
 package in.kahl.promptwhispers.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public record Step(
+public record Turn(
         @Id
         String id,
         @DBRef
         User player,
-        StepType type,
+        TurnType type,
         String content,
         Instant createdAt
 ) {
-    public Step(StepType type, String content) {
-        this(UUID.randomUUID().toString(), null, type, content, Instant.now());
+    public Turn(TurnType type, String content) {
+        this(null, type, content);
     }
 
     public Step(User player, StepType type, String content) {

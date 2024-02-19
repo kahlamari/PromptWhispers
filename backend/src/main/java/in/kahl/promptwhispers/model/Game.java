@@ -6,14 +6,17 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 public record Game(
         @Id
         String id,
         @DBRef
         List<User> players,
-        Map<Integer, List<Step>> rounds,
+        Map<Integer, List<Turn>> rounds,
         GameState gameState,
         Instant createdAt
 ) {
@@ -45,19 +48,19 @@ public record Game(
         return minStepNumber;
     }
 
-    public boolean stepCompleted() {
+    public boolean turnCompleted() {
         int minStepNumber = getLastCompletedStep();
         return rounds().values().stream().allMatch(steps -> steps.size() == minStepNumber);
     }
 
-    public Game withStep(Step step) {
-        int playerIndex = players().indexOf(step.player());
+    public Game withTurn(Turn turn) {
+        int playerIndex = players().indexOf(turn.player());
 
         // first step
         int offset = playerIndex + getLastCompletedStep();
 
-        ArrayList<Step> updatedSteps = new ArrayList<>(rounds().get(offset));
-        updatedSteps.add(step);
+        ArrayList<Turn> updatedSteps = new ArrayList<>(rounds().get(offset));
+        updatedSteps.add(turn);
 
         rounds().put(offset, updatedSteps);
 
@@ -67,23 +70,4 @@ public record Game(
                 gameState(),
                 createdAt());
     }
-
-    /*
-    public static final int MAX_IMAGE_STEPS = 3;
-
-    public static boolean maxStepsReached(List<Step> steps) {
-        return steps.stream().filter(step -> step.type().equals(StepType.IMAGE)).count() >= MAX_IMAGE_STEPS;
-    }
-
-    public Game withStep(Step step) {
-        if (isFinished()) {
-            throw new IllegalArgumentException("Game is finished. Not steps can be added.");
-        }
-        List<Step> stepList = new LinkedList<>(steps());
-        stepList.addLast(step);
-
-        return new Game(id(), stepList, createdAt(), maxStepsReached(stepList));
-    }
-    */
-
 }
