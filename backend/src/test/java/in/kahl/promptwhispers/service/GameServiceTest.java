@@ -198,16 +198,21 @@ class GameServiceTest {
 
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
-            Turn prompt = new Turn(TurnType.PROMPT, promptInput);
-            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, null, Map.of(0, List.of(prompt)), GameState.IMAGE_PHASE, time));
+            User user = new User(userEmail);
+            Turn prompt = new Turn(user, TurnType.PROMPT, promptInput);
+            Optional<Game> gameWithPrompt = Optional.of(new Game(gameId,
+                    List.of(user),
+                    new HashMap<>(Map.of(0, List.of(prompt))),
+                    GameState.IMAGE_PHASE,
+                    time));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
             String imageUrl = "https://example.com/image.png";
             when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
-            Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
-            Game gameWithImageUrl = new Game(gameId, null,
+            Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
+            Game gameWithImageUrl = new Game(gameId, List.of(user),
                     Map.of(0, List.of(prompt, generatedImage)), GameState.PROMPT_PHASE, time);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
