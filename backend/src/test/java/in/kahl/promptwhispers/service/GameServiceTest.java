@@ -1,8 +1,8 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.*;
-import in.kahl.promptwhispers.model.dto.GameResponse;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,10 +59,10 @@ class GameServiceTest {
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            GameResponse actual = serviceUnderTest.createGame(oAuth2User);
+            RoundResponse actual = serviceUnderTest.createGame(oAuth2User);
 
             // ASSERT
-            assertEquals(expected.asGameResponse(), actual);
+            assertEquals(expected.asRoundResponse(), actual);
             verify(gameRepo).save(expected);
             verifyNoMoreInteractions(gameRepo);
         }
@@ -75,10 +75,10 @@ class GameServiceTest {
         when(gameRepo.findById(expectedGame.get().id())).thenReturn(expectedGame);
 
         // ACT
-        GameResponse actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
+        RoundResponse actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
 
         // ASSERT
-        assertEquals(expectedGame.get().asGameResponse(), actualGame);
+        assertEquals(expectedGame.get().asRoundResponse(), actualGame);
         verify(gameRepo).findById(expectedGame.get().id());
         verifyNoMoreInteractions(gameRepo);
     }
@@ -159,6 +159,10 @@ class GameServiceTest {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
 
+            OAuth2User mockedPrincipal = mock(OAuth2User.class);
+            User testUser = new User(userEmail);
+            when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
             Optional<Game> gameWithOutPrompt = Optional.of(createEmptyGame());
             String gameId = gameWithOutPrompt.get().id();
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
@@ -175,10 +179,10 @@ class GameServiceTest {
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
             // ACT
-            Game actualGameWithPrompt = serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+            RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
             // ASSERT
-            assertEquals(expectedGameWithPrompt, actualGameWithPrompt);
+            assertEquals(expectedGameWithPrompt.asRoundResponse(), actualRoundWithPrompt);
             verify(gameRepo).findById(gameId);
             verify(gameRepo).save(expectedGameWithPrompt);
             verifyNoMoreInteractions(gameRepo);
@@ -217,10 +221,10 @@ class GameServiceTest {
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
 
             // ACT
-            Game gameActual = serviceUnderTest.generateImage(gameId);
+            RoundResponse roundResponseActual = serviceUnderTest.generateImage(gameId);
 
             // ASSERT
-            assertEquals(gameWithImageUrl, gameActual);
+            assertEquals(gameWithImageUrl.asRoundResponse(), roundResponseActual);
             verify(gameRepo).findById(gameId);
             verify(gameRepo).save(gameWithImageUrl);
             verifyNoMoreInteractions(gameRepo);
@@ -240,11 +244,15 @@ class GameServiceTest {
                 Instant.now()));
         when(gameRepo.findById(gameId)).thenReturn(gameWith3Images);
 
+        OAuth2User mockedPrincipal = mock(OAuth2User.class);
+        User testUser = new User(userEmail);
+        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
+
         String promptInput = "Sheep jumps over hedge";
         PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
         // ACT
-        Executable executable = () -> serviceUnderTest.submitPrompt(gameId, userProvidedPrompt);
+        Executable executable = () -> serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
         // ASSERT
         assertThrows(IllegalArgumentException.class, executable);

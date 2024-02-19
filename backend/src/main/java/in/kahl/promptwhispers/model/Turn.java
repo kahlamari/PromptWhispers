@@ -27,4 +27,8 @@ public record Turn(
                 content,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
+
+    public Turn withPlayer(User player) {
+        return new Turn(id(), player, type(), content(), createdAt());
+    }
 }

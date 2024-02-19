@@ -6,7 +6,7 @@ import in.kahl.promptwhispers.model.TurnType;
 public record PromptCreate(
         String prompt
 ) {
-    public Turn makeIntoPrompt() {
+    public Turn asNewPromptTurn() {
         return new Turn(TurnType.PROMPT, prompt());
     }
 }

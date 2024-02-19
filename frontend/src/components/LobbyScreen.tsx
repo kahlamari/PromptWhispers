@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
-import { Game } from "../types/Game.ts";
+import { Round } from "../types/Round.ts";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -41,8 +41,8 @@ export default function LobbyScreen(props: LobbyScreenProps) {
 
   const startGame = () => {
     axios
-      .post<Game>(`/api/games`, lobby)
-      .then((response) => navigate(`/play/${response.data.id}`));
+      .post<Round>(`/api/games`, lobby)
+      .then((response) => navigate(`/play/${response.data.gameId}`));
   };
 
   useEffect(() => {
