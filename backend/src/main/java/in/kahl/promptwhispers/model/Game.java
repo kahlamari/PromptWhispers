@@ -6,10 +6,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public record Game(
         @Id
@@ -39,9 +36,9 @@ public record Game(
         );
     }
 
-    public int getLastCompletedStep() {
+    public int getLastCompletedTurn() {
         int minStepNumber = players().size() * 2;
-        for (List<Step> steps : rounds().values()) {
+        for (List<Turn> steps : rounds().values()) {
             minStepNumber = Math.min(minStepNumber, steps.size());
         }
 
@@ -49,15 +46,15 @@ public record Game(
     }
 
     public boolean turnCompleted() {
-        int minStepNumber = getLastCompletedStep();
-        return rounds().values().stream().allMatch(steps -> steps.size() == minStepNumber);
+        int minTurnNumber = getLastCompletedTurn();
+        return rounds().values().stream().allMatch(steps -> steps.size() == minTurnNumber);
     }
 
     public Game withTurn(Turn turn) {
         int playerIndex = players().indexOf(turn.player());
 
         // first step
-        int offset = playerIndex + getLastCompletedStep();
+        int offset = playerIndex + getLastCompletedTurn();
 
         ArrayList<Turn> updatedSteps = new ArrayList<>(rounds().get(offset));
         updatedSteps.add(turn);

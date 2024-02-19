@@ -1,8 +1,10 @@
 package in.kahl.promptwhispers.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public record Turn(
@@ -18,7 +20,11 @@ public record Turn(
         this(null, type, content);
     }
 
-    public Step(User player, StepType type, String content) {
-        this(UUID.randomUUID().toString(), player, type, content, Instant.now());
+    public Turn(User player, TurnType type, String content) {
+        this(UUID.randomUUID().toString(),
+                player,
+                type,
+                content,
+                Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 }

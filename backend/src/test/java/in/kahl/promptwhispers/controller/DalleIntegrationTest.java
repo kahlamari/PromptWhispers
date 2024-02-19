@@ -141,7 +141,7 @@ public class DalleIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        GameResponse gameActual = objectMapper.readValue(resultJSON, Game.class);
+        GameResponse gameActual = objectMapper.readValue(resultJSON, GameResponse.class);
         Turn imageTurn = gameActual.turns().getLast();
 
         assertEquals(game.id(), gameActual.id());

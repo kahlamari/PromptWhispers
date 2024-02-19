@@ -102,7 +102,7 @@ public class GameService {
     public Game generateImage(String gameId) {
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
-        Turn prompt = getMostRecentPrompt(game.turns());
+        Turn prompt = getMostRecentPrompt(game.rounds().get(0));
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
