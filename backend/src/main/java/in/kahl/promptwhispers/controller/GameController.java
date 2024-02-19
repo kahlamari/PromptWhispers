@@ -23,12 +23,6 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("start")
-    @ResponseStatus(HttpStatus.CREATED)
-    public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal) {
-        return gameService.createGame(principal);
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
@@ -36,8 +30,8 @@ public class GameController {
     }
 
     @GetMapping("{gameId}")
-    public RoundResponse getGame(@PathVariable String gameId) {
-        return gameService.getGameById(gameId);
+    public RoundResponse getGame(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        return gameService.getGameById(principal, gameId);
     }
 
     @GetMapping()
@@ -52,6 +46,7 @@ public class GameController {
     }
 
     @PostMapping("{gameId}/prompt")
+    @ResponseStatus(HttpStatus.CREATED)
     public RoundResponse submitPrompt(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId, @RequestBody PromptCreate prompt) {
         return gameService.submitPrompt(principal, gameId, prompt);
     }

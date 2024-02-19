@@ -35,6 +35,37 @@ public record Game(
         );
     }
 
+    public RoundResponse asRoundResponse(User player) {
+        int playerIndex = players().indexOf(player);
+        int imageTurns = getLastCompletedImageTurn();
+
+        int roundOfPlayer = (playerIndex + imageTurns) % players().size();
+
+        return new RoundResponse(
+                id(),
+                rounds().get(roundOfPlayer) == null ? Collections.emptyList() : rounds().get(roundOfPlayer),
+                gameState() == GameState.FINISHED
+        );
+    }
+
+    public Game withPlayer(User player) {
+        if (!players().contains(player)) {
+            players().add(player);
+        }
+
+        return new Game(id(), players(), rounds(), gameState(), createdAt());
+    }
+
+    public int getLastCompletedImageTurn() {
+        int minTurnNumber = players().size();
+
+        for (List<Turn> turns : rounds.values()) {
+            minTurnNumber = Math.min(minTurnNumber, (int) turns.stream().filter(turn -> turn.type().equals(TurnType.IMAGE)).count());
+        }
+
+        return minTurnNumber;
+    }
+
     public int getLastCompletedTurn() {
         int minTurnNumber = players().size() * 2;
         for (List<Turn> turns : rounds().values()) {
@@ -53,12 +84,16 @@ public record Game(
         int playerIndex = players().indexOf(turn.player());
 
         // first step
-        int offset = playerIndex + getLastCompletedTurn();
+        int offset = (playerIndex + getLastCompletedImageTurn()) % players().size();
+        System.out.println("offset: " + offset);
 
-        ArrayList<Turn> updatedSteps = new ArrayList<>(rounds().get(offset));
-        updatedSteps.add(turn);
+        List<Turn> updatedTurns = new ArrayList<>();
+        if (rounds().get(offset) != null) {
+            updatedTurns.addAll(rounds().get(offset));
+        }
+        updatedTurns.add(turn);
 
-        rounds().put(offset, updatedSteps);
+        rounds().put(offset, updatedTurns);
 
         return new Game(id(),
                 players(),

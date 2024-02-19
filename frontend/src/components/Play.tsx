@@ -57,15 +57,14 @@ export default function Play() {
     };
 
     setInputDisabled(true);
-    submitPrompt(promptToSubmit)
-      .then(() => {
-        return requestImageGeneration();
-      })
-      .then((gameWithImage) => {
-        setGame(gameWithImage);
-        setPrompt("");
-        setInputDisabled(false);
-      });
+    submitPrompt(promptToSubmit).then(() => {
+      return true; //requestImageGeneration();
+    });
+    /*.then((gameWithImage) => {
+      setGame(gameWithImage);
+      setPrompt("");
+      setInputDisabled(false);
+    });*/
   };
 
   const getLastImage = (): Turn | undefined => {

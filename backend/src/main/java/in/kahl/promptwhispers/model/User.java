@@ -19,10 +19,10 @@ public record User(
         Instant createdAt
 ) {
     public User(String email) {
-        this(UUID.randomUUID().toString(), email, Collections.emptyList(), AuthProvider.GOOGLE, Instant.now().truncatedTo(ChronoUnit.MILLIS));
+        this(UUID.randomUUID().toString(), email, new ArrayList<>(Collections.emptyList()), AuthProvider.GOOGLE, Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
-    public User withGames(List<String> gamesList) {
+    public User withGameIds(List<String> gamesList) {
         return new User(id(), email(), gamesList, authProvider(), createdAt());
     }
 
@@ -32,13 +32,22 @@ public record User(
             updatedGames.addAll(gameIds());
         }
         updatedGames.add(game.id());
-        return withGames(updatedGames);
+        return withGameIds(updatedGames);
+    }
+
+    public User withGameId(String gameId) {
+        List<String> updatedGameIds = new ArrayList<>();
+        if (gameIds() != null) {
+            updatedGameIds.addAll(gameIds());
+        }
+        updatedGameIds.add(gameId);
+        return withGameIds(updatedGameIds);
     }
 
     public User withoutGame(Game game) {
         List<String> updatedGames = new ArrayList<>(gameIds());
         updatedGames.remove(game.id());
-        return withGames(updatedGames);
+        return withGameIds(updatedGames);
     }
 }
 

@@ -33,25 +33,31 @@ public class GameService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public RoundResponse createGame(OAuth2User principal) {
-        User user = userService.getLoggedInUser(principal);
-        Game newGame = gameRepo.save(new Game(user));
-        userService.save(user.withGame(newGame));
-
-        return newGame.asRoundResponse();
-    }
-
     public RoundResponse createGame(OAuth2User principal, Lobby lobby) {
         User user = userService.getLoggedInUser(principal);
-        Game newGame = gameRepo.save(new Game(user));
-        userService.save(user.withGame(newGame));
+        User host = userService.getUserById(lobby.host().id());
+        if (!user.equals(host)) {
+            throw new IllegalStateException("Only the host can start a new game!");
+        }
+
+        Game newGame = new Game(host);
+
+        for (User player : lobby.players()) {
+            newGame = newGame.withPlayer(player);
+            userService.save(player.withGameId(newGame.id()));
+        }
+
+
+        newGame = gameRepo.save(newGame);
         lobbyService.update(lobby.withGameId(newGame.id()));
 
-        return newGame.asRoundResponse();
+        return newGame.asRoundResponse(user);
     }
 
-    public RoundResponse getGameById(String id) {
-        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asRoundResponse();
+    public RoundResponse getGameById(OAuth2User principal, String id) {
+        User user = userService.getLoggedInUser(principal);
+
+        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asRoundResponse(user);
     }
 
     public List<Game> getGamesByUser(OAuth2User principal) {
@@ -97,7 +103,7 @@ public class GameService {
         Turn newPrompt = promptCreate.asNewPromptTurn().withPlayer(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
-        return gameRepo.save(gameWithPrompt).asRoundResponse();
+        return gameRepo.save(gameWithPrompt).asRoundResponse(user);
     }
 
     public RoundResponse generateImage(String gameId) {
