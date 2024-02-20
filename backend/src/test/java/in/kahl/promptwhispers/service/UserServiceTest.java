@@ -159,10 +159,10 @@ class UserServiceTest {
         when(userRepo.findById(testUser.id())).thenReturn(Optional.of(testUser));
 
         // ACT
-        List<Game> gameListActual = serviceUnderTest.getAllGames(testUser.id());
+        List<String> gameListActual = serviceUnderTest.getAllGameIds(testUser.id());
 
         // ASSERT
-        assertEquals(testUser.games(), gameListActual);
+        assertEquals(testUser.gameIds(), gameListActual);
     }
 
     @Test
@@ -170,7 +170,7 @@ class UserServiceTest {
         // ARRANGE
 
         // ACT
-        Executable executable = () -> serviceUnderTest.getAllGames("not_existent_id");
+        Executable executable = () -> serviceUnderTest.getAllGameIds("not_existent_id");
 
         // ASSERT
         assertThrows(NoSuchElementException.class, executable);
