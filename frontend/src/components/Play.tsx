@@ -8,6 +8,7 @@ import { Round } from "../types/Round.ts";
 export default function Play() {
   const params = useParams();
   const gameId: string | undefined = params.gameId;
+
   const [prompt, setPrompt] = useState<string>("");
   const [round, setRound] = useState<Round>();
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
@@ -21,6 +22,7 @@ export default function Play() {
         `/api/games/${gameId}/prompt`,
         promptToSubmit,
       );
+      setRound(response.data);
       return response.data;
     } catch (e) {
       console.log(e);
@@ -47,18 +49,15 @@ export default function Play() {
       console.log(
         "GetRound: " + freshRound.gameState + inputDisabled + waitingForImage,
       );
-      if (
-        inputDisabled &&
-        freshRound.gameState === "IMAGE_PHASE" &&
-        !waitingForImage
-      ) {
-        console.log("RequestImage");
-        setWaitingForImage(true);
-        requestImageGeneration();
-      } else if (waitingForImage && freshRound.gameState === "PROMPT_PHASE") {
+      if (freshRound.gameState === "REQUEST_NEW_PROMPTS") {
+        console.log("REQUEST_NEW_PROMPTS");
         setPrompt("");
         setInputDisabled(false);
         setWaitingForImage(false);
+      } else if (freshRound.gameState === "WAIT_FOR_IMAGES") {
+        console.log("WAIT_FOR_IMAGES");
+      } else if (freshRound.gameState === "WAIT_FOR_PROMPTS") {
+        console.log("WAIT_FOR_PROMPT");
       }
     });
   };
@@ -75,7 +74,14 @@ export default function Play() {
     };
 
     setInputDisabled(true);
-    submitPrompt(promptToSubmit);
+    setWaitingForImage(true);
+    submitPrompt(promptToSubmit).then((response) => {
+      if (response?.gameState === "REQUEST_NEW_PROMPTS") {
+        setPrompt("");
+        setInputDisabled(false);
+        setWaitingForImage(false);
+      }
+    });
   };
 
   const getLastImage = (): Turn | undefined => {
@@ -98,7 +104,12 @@ export default function Play() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (gameId) {
+      console.log("In UseEffect: " + round?.gameState);
+      if (
+        gameId &&
+        round?.gameState !== "REQUEST_NEW_PROMPTS" &&
+        round?.gameState !== "FINISHED"
+      ) {
         getRound(gameId);
       }
     }, 5000);
@@ -106,7 +117,7 @@ export default function Play() {
     return () => {
       clearInterval(interval);
     };
-  }, [gameId]);
+  }, [gameId, round]);
 
   return (
     <div className="flex flex-col items-center">

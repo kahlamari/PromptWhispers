@@ -1,5 +1,5 @@
 package in.kahl.promptwhispers.model;
 
 public enum GameState {
-    NEW, PROMPT_PHASE, IMAGE_PHASE, FINISHED
+    NEW, REQUEST_NEW_PROMPTS, WAIT_FOR_PROMPTS, WAIT_FOR_IMAGES, FINISHED
 }

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public record Game(
         @Id
@@ -54,8 +55,16 @@ public record Game(
         return new Game(id(), players(), rounds(), gameState(), createdAt());
     }
 
+    public Game withGameState(GameState gameState) {
+        return new Game(id(), players(), rounds(), gameState, createdAt());
+    }
+
     private int getNumOfCompletedImageTurns() {
         int minTurnNumber = players().size();
+
+        if (players().size() != rounds().size()) {
+            return 0;
+        }
 
         for (List<Turn> turns : rounds.values()) {
             minTurnNumber = Math.min(minTurnNumber, (int) turns.stream().filter(turn -> turn.type().equals(TurnType.IMAGE)).count());
@@ -68,41 +77,45 @@ public record Game(
         return getNumOfCompletedImageTurns() >= players().size();
     }
 
-    private int getNumOfCompletedTurns() {
-        int minTurnNumber = players().size() * 2;
-        for (List<Turn> turns : rounds().values()) {
-            minTurnNumber = Math.min(minTurnNumber, turns.size());
+    private boolean haveAllRoundsSameNumberOfTurnsByType(TurnType turnType) {
+        Set<Long> counts = rounds().values().stream()
+                .map(turns -> turns.stream().filter(turn -> turn.type().equals(turnType)).count())
+                .collect(Collectors.toSet());
+
+        if (players().size() != rounds().size()) {
+            return counts.contains(0L);
         }
-
-        return minTurnNumber;
-    }
-
-    public boolean turnCompleted() {
-        int minTurnNumber = getNumOfCompletedTurns();
-        return rounds().values().stream().allMatch(steps -> steps.size() == minTurnNumber);
+        return counts.size() == 1;
     }
 
     private GameState determineGameState() {
+        System.out.println("Game State: " + gameState());
+        System.out.println("Prompt same: " + haveAllRoundsSameNumberOfTurnsByType(TurnType.PROMPT));
+        System.out.println("Image same: " + haveAllRoundsSameNumberOfTurnsByType(TurnType.IMAGE));
         if (isGameFinished()) {
             return GameState.FINISHED;
         }
 
         if (gameState().equals(GameState.NEW)) {
-            return GameState.PROMPT_PHASE;
+            return GameState.REQUEST_NEW_PROMPTS;
         }
 
-        if (gameState().equals(GameState.PROMPT_PHASE)) {
-            if (turnCompleted()) {
-                return GameState.IMAGE_PHASE;
-            }
-            return gameState();
+        if (gameState().equals(GameState.REQUEST_NEW_PROMPTS)
+                && !haveAllRoundsSameNumberOfTurnsByType(TurnType.PROMPT)
+                && haveAllRoundsSameNumberOfTurnsByType(TurnType.IMAGE)) {
+            return GameState.WAIT_FOR_PROMPTS;
         }
 
-        if (gameState().equals(GameState.IMAGE_PHASE)) {
-            if (turnCompleted()) {
-                return GameState.PROMPT_PHASE;
-            }
-            return gameState();
+        if (gameState().equals(GameState.WAIT_FOR_PROMPTS)
+                && haveAllRoundsSameNumberOfTurnsByType(TurnType.PROMPT)
+                && !haveAllRoundsSameNumberOfTurnsByType(TurnType.IMAGE)) {
+            return GameState.WAIT_FOR_IMAGES;
+        }
+
+        if (gameState().equals(GameState.WAIT_FOR_IMAGES)
+                && haveAllRoundsSameNumberOfTurnsByType(TurnType.PROMPT)
+                && haveAllRoundsSameNumberOfTurnsByType(TurnType.IMAGE)) {
+            return GameState.REQUEST_NEW_PROMPTS;
         }
         return gameState();
     }

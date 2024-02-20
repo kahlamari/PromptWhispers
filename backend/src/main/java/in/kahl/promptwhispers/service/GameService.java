@@ -47,7 +47,7 @@ public class GameService {
             userService.save(player.withGameId(newGame.id()));
         }
 
-        newGame = gameRepo.save(newGame);
+        newGame = gameRepo.save(newGame.withGameState(GameState.REQUEST_NEW_PROMPTS));
         lobbyService.update(lobby.withGameId(newGame.id()));
 
         return newGame.asRoundResponse(user);
@@ -89,18 +89,25 @@ public class GameService {
         Turn newPrompt = promptCreate.asNewPromptTurn().withPlayer(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
-        return gameRepo.save(gameWithPrompt).asRoundResponse(user);
+        gameRepo.save(gameWithPrompt);
+
+        return generateImage(principal, gameWithPrompt.id());
     }
 
     public RoundResponse generateImage(OAuth2User principal, String gameId) {
         System.out.println("Request Image Generation");
         User user = userService.getLoggedInUser(principal);
+        System.out.println("User email:" + user.email());
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         Turn prompt = game.getMostRecentPromptByPlayer(user);
+        System.out.println("Prompt: " + prompt.content());
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
+
+        // Pull game again to ensure that concurrent image generations are pulled.
+        game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
         Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
         Game gameWithImage = game.withTurn(generatedImage);
 

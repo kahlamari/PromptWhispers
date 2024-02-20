@@ -207,7 +207,7 @@ class GameServiceTest {
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId,
                     List.of(user),
                     new HashMap<>(Map.of(0, List.of(prompt))),
-                    GameState.IMAGE_PHASE,
+                    GameState.WAIT_FOR_IMAGES,
                     time));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
