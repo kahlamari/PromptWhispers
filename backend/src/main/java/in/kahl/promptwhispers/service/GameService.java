@@ -94,14 +94,11 @@ public class GameService {
         return generateImage(principal, gameWithPrompt.id());
     }
 
-    public RoundResponse generateImage(OAuth2User principal, String gameId) {
-        System.out.println("Request Image Generation");
+    private RoundResponse generateImage(OAuth2User principal, String gameId) {
         User user = userService.getLoggedInUser(principal);
-        System.out.println("User email:" + user.email());
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         Turn prompt = game.getMostRecentPromptByPlayer(user);
-        System.out.println("Prompt: " + prompt.content());
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);

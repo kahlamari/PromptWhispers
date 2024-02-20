@@ -21,7 +21,7 @@ public record Game(
     public Game(User host) {
         this(UUID.randomUUID().toString(),
                 new ArrayList<>(List.of(host)),
-                Collections.emptyMap(),
+                new HashMap<>(),
                 GameState.NEW,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
@@ -74,7 +74,7 @@ public record Game(
     }
 
     private boolean isGameFinished() {
-        return getNumOfCompletedImageTurns() >= players().size();
+        return gameState() == GameState.FINISHED || getNumOfCompletedImageTurns() >= players().size();
     }
 
     private boolean haveAllRoundsSameNumberOfTurnsByType(TurnType turnType) {
@@ -89,9 +89,6 @@ public record Game(
     }
 
     private GameState determineGameState() {
-        System.out.println("Game State: " + gameState());
-        System.out.println("Prompt same: " + haveAllRoundsSameNumberOfTurnsByType(TurnType.PROMPT));
-        System.out.println("Image same: " + haveAllRoundsSameNumberOfTurnsByType(TurnType.IMAGE));
         if (isGameFinished()) {
             return GameState.FINISHED;
         }
@@ -121,6 +118,10 @@ public record Game(
     }
 
     public Game withTurn(Turn turn) {
+        if (isGameFinished()) {
+            throw new IllegalArgumentException("Game is finished. No turns can be added.");
+        }
+
         int playerIndex = players().indexOf(turn.player());
 
         int offset = (playerIndex + getNumOfCompletedImageTurns()) % players().size();

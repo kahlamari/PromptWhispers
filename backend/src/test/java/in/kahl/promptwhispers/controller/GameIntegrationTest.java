@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.GameState;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
@@ -81,7 +82,7 @@ class GameIntegrationTest {
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.turns").isEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)))
+                .andExpect(jsonPath("$.gameState", is(GameState.NEW)))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -89,7 +90,7 @@ class GameIntegrationTest {
         RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
         assertEquals(gameExpected.gameId(), game.gameId());
         assertEquals(gameExpected.turns(), game.turns());
-        assertEquals(gameExpected.isGameFinished(), game.isGameFinished());
+        assertEquals(gameExpected.gameState(), game.gameState());
     }
 
     @Test
