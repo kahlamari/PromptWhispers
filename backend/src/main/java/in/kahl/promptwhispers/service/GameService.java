@@ -82,19 +82,6 @@ public class GameService {
         }
     }
 
-    private static Turn getMostRecentPrompt(List<Turn> turns) {
-        if (turns.isEmpty()) {
-            throw new NoSuchElementException();
-        }
-
-        Turn turn = turns.getLast();
-
-        if (turn.type().equals(TurnType.PROMPT)) {
-            return turn;
-        }
-        throw new NoSuchElementException();
-    }
-
     public RoundResponse submitPrompt(OAuth2User principal, String gameId, PromptCreate promptCreate) {
         User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
@@ -105,16 +92,18 @@ public class GameService {
         return gameRepo.save(gameWithPrompt).asRoundResponse(user);
     }
 
-    public RoundResponse generateImage(String gameId) {
+    public RoundResponse generateImage(OAuth2User principal, String gameId) {
+        System.out.println("Request Image Generation");
+        User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
-        Turn prompt = getMostRecentPrompt(game.rounds().get(0));
+        Turn prompt = game.getMostRecentPromptByPlayer(user);
 
         String imageUrlDalle = dalleService.getGeneratedImageUrl(prompt.content());
         String imageUrl = cloudinaryService.uploadImage(imageUrlDalle);
-        Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
+        Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
         Game gameWithImage = game.withTurn(generatedImage);
 
-        return gameRepo.save(gameWithImage).asRoundResponse();
+        return gameRepo.save(gameWithImage).asRoundResponse(user);
     }
 }

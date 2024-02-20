@@ -53,8 +53,8 @@ public class GameController {
 
     @PostMapping("{gameId}/generateImage")
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundResponse generateImage(@PathVariable String gameId) {
-        return gameService.generateImage(gameId);
+    public RoundResponse generateImage(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        return gameService.generateImage(principal, gameId);
     }
 
     @ExceptionHandler(NoSuchElementException.class)

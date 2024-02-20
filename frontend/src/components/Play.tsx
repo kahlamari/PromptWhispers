@@ -2,21 +2,22 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { Game } from "../types/Game.ts";
 import { Turn } from "../types/Turn.ts";
+import { Round } from "../types/Round.ts";
 
 export default function Play() {
   const params = useParams();
   const gameId: string | undefined = params.gameId;
   const [prompt, setPrompt] = useState<string>("");
-  const [game, setGame] = useState<Game>();
+  const [round, setRound] = useState<Round>();
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
+  const [waitingForImage, setWaitingForImage] = useState<boolean>(false);
 
   const submitPrompt = async (
     promptToSubmit: PromptCreate,
-  ): Promise<Game | undefined> => {
+  ): Promise<Round | undefined> => {
     try {
-      const response = await axios.post<Game>(
+      const response = await axios.post<Round>(
         `/api/games/${gameId}/prompt`,
         promptToSubmit,
       );
@@ -27,9 +28,9 @@ export default function Play() {
     }
   };
 
-  const requestImageGeneration = async (): Promise<Game | undefined> => {
+  const requestImageGeneration = async (): Promise<Round | undefined> => {
     try {
-      const response = await axios.post<Game>(
+      const response = await axios.post<Round>(
         `/api/games/${gameId}/generateImage`,
       );
       return response.data;
@@ -39,9 +40,26 @@ export default function Play() {
     }
   };
 
-  const getGame = (gameId: string) => {
-    axios.get<Game>(`/api/games/${gameId}`).then((response) => {
-      setGame(response.data);
+  const getRound = (gameId: string) => {
+    axios.get<Round>(`/api/games/${gameId}`).then((response) => {
+      const freshRound = response.data;
+      setRound(freshRound);
+      console.log(
+        "GetRound: " + freshRound.gameState + inputDisabled + waitingForImage,
+      );
+      if (
+        inputDisabled &&
+        freshRound.gameState === "IMAGE_PHASE" &&
+        !waitingForImage
+      ) {
+        console.log("RequestImage");
+        setWaitingForImage(true);
+        requestImageGeneration();
+      } else if (waitingForImage && freshRound.gameState === "PROMPT_PHASE") {
+        setPrompt("");
+        setInputDisabled(false);
+        setWaitingForImage(false);
+      }
     });
   };
 
@@ -57,34 +75,37 @@ export default function Play() {
     };
 
     setInputDisabled(true);
-    submitPrompt(promptToSubmit).then(() => {
-      return true; //requestImageGeneration();
-    });
-    /*.then((gameWithImage) => {
-      setGame(gameWithImage);
-      setPrompt("");
-      setInputDisabled(false);
-    });*/
+    submitPrompt(promptToSubmit);
   };
 
   const getLastImage = (): Turn | undefined => {
-    if (game) {
+    if (round) {
       // Due to the game's logic there needs to be a prompt before there can be an image
-      if (game.turns.length < 2) {
+      if (round.turns.length < 2) {
         return undefined;
       }
-      const lastStep: Turn = game.turns[game.turns.length - 1];
-      if (lastStep.type === "IMAGE") {
-        return lastStep;
+      const lastTurn: Turn = round.turns[round.turns.length - 1];
+      if (lastTurn.type === "IMAGE") {
+        return lastTurn;
       }
     }
     return undefined;
   };
 
+  const isGameFinished = (): boolean => {
+    return round?.gameState === "FINISHED";
+  };
+
   useEffect(() => {
-    if (gameId) {
-      getGame(gameId);
-    }
+    const interval = setInterval(() => {
+      if (gameId) {
+        getRound(gameId);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameId]);
 
   return (
@@ -96,7 +117,7 @@ export default function Play() {
           src={getLastImage()?.content}
         />
       )}
-      {!game?.isFinished && (
+      {!isGameFinished() && (
         <>
           <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
             Enter your prompt!
@@ -121,7 +142,7 @@ export default function Play() {
           </form>
         </>
       )}
-      {game?.isFinished && (
+      {isGameFinished() && (
         <div className="flex flex-col items-center">
           <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
             Game is completed!

@@ -31,8 +31,7 @@ public record Game(
         return new RoundResponse(
                 id(),
                 rounds().get(playerIndex) == null ? Collections.emptyList() : rounds().get(playerIndex),
-                gameState() == GameState.FINISHED
-        );
+                gameState());
     }
 
     public RoundResponse asRoundResponse(User player) {
@@ -44,8 +43,7 @@ public record Game(
         return new RoundResponse(
                 id(),
                 rounds().get(roundOfPlayer) == null ? Collections.emptyList() : rounds().get(roundOfPlayer),
-                gameState() == GameState.FINISHED
-        );
+                gameState());
     }
 
     public Game withPlayer(User player) {
@@ -127,5 +125,22 @@ public record Game(
                 rounds(),
                 determineGameState(),
                 createdAt());
+    }
+
+    public Turn getMostRecentPromptByPlayer(User player) {
+        int playerIndex = players().indexOf(player);
+        int offset = (playerIndex + getNumOfCompletedImageTurns()) % players().size();
+
+        List<Turn> round = rounds().get(offset);
+
+        if (round == null || round.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
+        Turn turn = round.getLast();
+        if (turn.type().equals(TurnType.PROMPT)) {
+            return turn;
+        }
+        throw new NoSuchElementException();
     }
 }
