@@ -1,8 +1,8 @@
 package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.Step;
-import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.Turn;
+import in.kahl.promptwhispers.model.TurnType;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
 import in.kahl.promptwhispers.repo.GameRepo;
@@ -167,7 +167,7 @@ class GameServiceTest {
             String promptInput = "Sheep jumps over hedge";
 
             Game expectedGameWithPrompt = new Game(gameId,
-                    List.of(new Step(StepType.PROMPT, promptInput)),
+                    List.of(new Turn(TurnType.PROMPT, promptInput)),
                     time, false);
             when(gameRepo.save(expectedGameWithPrompt)).thenReturn(expectedGameWithPrompt);
 
@@ -197,7 +197,7 @@ class GameServiceTest {
 
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
-            Step prompt = new Step(StepType.PROMPT, promptInput);
+            Turn prompt = new Turn(TurnType.PROMPT, promptInput);
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId, List.of(prompt), time, false));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
 
@@ -205,7 +205,7 @@ class GameServiceTest {
             when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
-            Step generatedImage = new Step(StepType.IMAGE, imageUrl);
+            Turn generatedImage = new Turn(TurnType.IMAGE, imageUrl);
             Game gameWithImageUrl = new Game(gameId,
                     List.of(prompt, generatedImage), time, false);
             when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);

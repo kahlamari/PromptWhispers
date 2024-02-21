@@ -52,7 +52,7 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.steps").isEmpty())
+                .andExpect(jsonPath("$.turns").isEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.isFinished", is(false)));
     }
@@ -78,7 +78,7 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.steps").isEmpty())
+                .andExpect(jsonPath("$.turns").isEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.isFinished", is(false)))
                 .andReturn()
@@ -87,7 +87,7 @@ class GameIntegrationTest {
 
         Game game = objectMapper.readValue(saveResult, Game.class);
         assertEquals(gameExpected.id(), game.id());
-        assertEquals(gameExpected.steps(), game.steps());
+        assertEquals(gameExpected.turns(), game.turns());
         assertEquals(gameExpected.isFinished(), game.isFinished());
     }
 
@@ -231,7 +231,7 @@ class GameIntegrationTest {
                 // ASSERT
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.steps").isNotEmpty())
+                .andExpect(jsonPath("$.turns").isNotEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.isFinished", is(false)));
     }

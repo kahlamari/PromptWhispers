@@ -1,12 +1,12 @@
 package in.kahl.promptwhispers.model.dto;
 
-import in.kahl.promptwhispers.model.Step;
-import in.kahl.promptwhispers.model.StepType;
+import in.kahl.promptwhispers.model.Turn;
+import in.kahl.promptwhispers.model.TurnType;
 
 public record PromptCreate(
         String prompt
 ) {
-    public Step makeIntoPrompt() {
-        return new Step(StepType.PROMPT, prompt());
+    public Turn makeIntoPrompt() {
+        return new Turn(TurnType.PROMPT, prompt());
     }
 }

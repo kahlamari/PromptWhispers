@@ -1,5 +1,5 @@
 package in.kahl.promptwhispers.model;
 
-public enum StepType {
+public enum TurnType {
     PROMPT, IMAGE
 }

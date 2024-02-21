@@ -21,7 +21,7 @@ export default function GameReply() {
 
   return (
     <div className="flex flex-col items-center">
-      {game?.steps.map((step) => (
+      {game?.turns.map((step) => (
         <div key={step.id}>
           {step.type === "PROMPT" ? (
             <textarea

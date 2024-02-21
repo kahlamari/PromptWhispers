@@ -1,8 +1,8 @@
-import { Step } from "./Step.ts";
+import { Turn } from "./Turn.ts";
 
 export type Game = {
   id: string;
-  steps: Step[];
+  turns: Turn[];
   createdAt: Date;
   isFinished: boolean;
 };

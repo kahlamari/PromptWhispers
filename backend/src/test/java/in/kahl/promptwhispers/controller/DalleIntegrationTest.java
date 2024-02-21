@@ -4,7 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.kahl.promptwhispers.model.Game;
-import in.kahl.promptwhispers.model.Step;
+import in.kahl.promptwhispers.model.Turn;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.repo.UserRepo;
 import okhttp3.mockwebserver.MockResponse;
@@ -133,7 +133,7 @@ public class DalleIntegrationTest {
                 // ASSERT
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.steps").isNotEmpty())
+                .andExpect(jsonPath("$.turns").isNotEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.isFinished", is(false)))
                 .andReturn()
@@ -141,10 +141,10 @@ public class DalleIntegrationTest {
                 .getContentAsString();
 
         Game gameActual = objectMapper.readValue(resultJSON, Game.class);
-        Step imageStep = gameActual.steps().getLast();
+        Turn imageTurn = gameActual.turns().getLast();
 
         assertEquals(game.id(), gameActual.id());
-        assertEquals(imageUrl, imageStep.content());
-        assertTrue(Instant.now().minusSeconds(10L).isBefore(imageStep.createdAt()));
+        assertEquals(imageUrl, imageTurn.content());
+        assertTrue(Instant.now().minusSeconds(10L).isBefore(imageTurn.createdAt()));
     }
 }
