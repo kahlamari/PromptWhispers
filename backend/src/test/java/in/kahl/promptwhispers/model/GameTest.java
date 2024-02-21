@@ -11,14 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class GameTest {
 
     @Test
-    void withStepTest_whenProvidingStep_thenReturnGameWithStep() {
+    void withTurnTest_whenProvidingTurn_thenReturnGameWithTurn() {
         // ARRANGE
-        Game newGame = new Game(null);
+        User user = new User("user@example.com");
+        Game newGame = new Game(user);
         Turn turnPrompt = new Turn(TurnType.PROMPT, "A hedge jumps over a sheep");
         Game gameExpected = new Game(newGame.id(),
                 newGame.players(),
                 Map.of(0, List.of(turnPrompt)),
-                newGame.gameState(),
+                GameState.REQUEST_NEW_PROMPTS,
                 newGame.createdAt());
 
         // ACT
@@ -29,34 +30,44 @@ class GameTest {
     }
 
     @Test
-    void withStepTest_whenMaxStepsReached_thenGameIsFinished() {
+    void withTurnTest_whenAllRoundsEnded_thenGameIsFinished() {
         // ARRANGE
-        Game gameWith2Images = new Game(null)
-                .withTurn(new Turn(TurnType.PROMPT, "1st prompt"))
-                .withTurn(new Turn(TurnType.IMAGE, "image1.png"))
-                .withTurn(new Turn(TurnType.PROMPT, "2nd prompt"))
-                .withTurn(new Turn(TurnType.IMAGE, "image2.png"))
-                .withTurn(new Turn(TurnType.PROMPT, "3rd prompt"));
+        User alice = new User("alice@example.com");
+        User bob = new User("bob@example.com");
+        Game gameWith1Image = new Game(alice)
+                .withPlayer(bob)
+                .withTurn(new Turn(alice, TurnType.PROMPT, "1st prompt"))
+                .withTurn(new Turn(bob, TurnType.PROMPT, "1st prompt"))
+                .withTurn(new Turn(alice, TurnType.IMAGE, "alice image 1.png"))
+                .withTurn(new Turn(bob, TurnType.IMAGE, "bob image 1.png"))
+                .withTurn(new Turn(alice, TurnType.PROMPT, "2nd prompt"))
+                .withTurn(new Turn(bob, TurnType.PROMPT, "2nd prompt"))
+                .withTurn(new Turn(alice, TurnType.IMAGE, "alice image 2.png"));
 
         // ACT
-        Game finishedGame = gameWith2Images.withTurn(new Turn(TurnType.IMAGE, "image3.png"));
+        Game finishedGame = gameWith1Image.withTurn(new Turn(bob, TurnType.IMAGE, "bob image2.png"));
 
         // ASSERT
         assertEquals(GameState.FINISHED, finishedGame.gameState());
     }
 
     @Test
-    void withStepTest_whenAddingStepToFinishedGame_thenThrowException() {
+    void withTurnTest_whenAddingTurnToFinishedGame_thenThrowException() {
         // ARRANGE
-        Game finishedGame = new Game(null)
-                .withTurn(new Turn(TurnType.PROMPT, "1st prompt"))
-                .withTurn(new Turn(TurnType.IMAGE, "image1.png"))
-                .withTurn(new Turn(TurnType.PROMPT, "2nd prompt"))
-                .withTurn(new Turn(TurnType.IMAGE, "image2.png"))
-                .withTurn(new Turn(TurnType.PROMPT, "3rd prompt"))
-                .withTurn(new Turn(TurnType.IMAGE, "image3.png"));
+        User alice = new User("alice@example.com");
+        User bob = new User("bob@example.com");
+        Game finishedGame = new Game(alice)
+                .withPlayer(bob)
+                .withTurn(new Turn(alice, TurnType.PROMPT, "1st prompt"))
+                .withTurn(new Turn(bob, TurnType.PROMPT, "1st prompt"))
+                .withTurn(new Turn(alice, TurnType.IMAGE, "alice image 1.png"))
+                .withTurn(new Turn(bob, TurnType.IMAGE, "bob image 1.png"))
+                .withTurn(new Turn(alice, TurnType.PROMPT, "2nd prompt"))
+                .withTurn(new Turn(bob, TurnType.PROMPT, "2nd prompt"))
+                .withTurn(new Turn(alice, TurnType.IMAGE, "alice image 2.png"))
+                .withTurn(new Turn(bob, TurnType.IMAGE, "bob image 2.png"));
 
-        Turn prompt4 = new Turn(TurnType.PROMPT, "4th prompt");
+        Turn prompt4 = new Turn(alice, TurnType.PROMPT, "4th prompt");
         // ACT
         assertThrows(IllegalArgumentException.class, () ->
                 // ASSERT
