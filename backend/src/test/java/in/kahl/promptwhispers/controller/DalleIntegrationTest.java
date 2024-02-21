@@ -3,7 +3,8 @@ package in.kahl.promptwhispers.controller;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.GameState;
+import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.Turn;
 import in.kahl.promptwhispers.model.User;
 import in.kahl.promptwhispers.model.dto.RoundResponse;
@@ -87,16 +88,23 @@ public class DalleIntegrationTest {
     @DirtiesContext
     void generateImageTest_whenRequested_thenReturnGeneratedImageUrl() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        User bob = userRepo.save(new User("bob@example.com"));
+        Lobby lobby = new Lobby(host);
+        lobby = lobby.withPlayer(bob);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
+
+        String saveResult = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
+                        .content(lobbyAsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Game game = objectMapper.readValue(saveResult, Game.class);
+        RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
 
-        saveResult = mockMvc.perform(post("/api/games/" + game.id() + "/prompt")
+        saveResult = mockMvc.perform(post("/api/games/" + game.gameId() + "/prompt")
                 .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                 .content("""
@@ -106,7 +114,7 @@ public class DalleIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        game = objectMapper.readValue(saveResult, Game.class);
+        game = objectMapper.readValue(saveResult, RoundResponse.class);
 
         mockWebServer.enqueue(new MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -128,15 +136,14 @@ public class DalleIntegrationTest {
         when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
-        String resultJSON = mockMvc.perform(post("/api/games/" + game.id() + "/generateImage")
+        String resultJSON = mockMvc.perform(post("/api/games/" + game.gameId() + "/generateImage")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", "user@example.com"))))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.gameId").isNotEmpty())
                 .andExpect(jsonPath("$.turns").isNotEmpty())
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)))
+                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -144,7 +151,7 @@ public class DalleIntegrationTest {
         RoundResponse gameActual = objectMapper.readValue(resultJSON, RoundResponse.class);
         Turn imageTurn = gameActual.turns().getLast();
 
-        assertEquals(game.id(), gameActual.gameId());
+        assertEquals(game.gameId(), gameActual.gameId());
         assertEquals(imageUrl, imageTurn.content());
         assertTrue(Instant.now().minusSeconds(10L).isBefore(imageTurn.createdAt()));
     }
