@@ -188,8 +188,9 @@ class GameServiceTest {
                     gameWithOutPrompt.get().gameState(),
                     gameWithOutPrompt.get().createdAt()));
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt)
-                    .thenReturn(gameWithPrompt)
                     .thenReturn(gameWithPrompt);
+
+            when(gameRepo.save(gameWithPrompt.get())).thenReturn(gameWithPrompt.get());
 
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
@@ -199,7 +200,7 @@ class GameServiceTest {
             when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
 
             Game gameWithImage = gameWithPrompt.get().withTurn(new Turn(testUser, TurnType.IMAGE, imageUrl));
-            when(gameRepo.save(gameWithImage)).thenReturn(gameWithImage);
+            //when(gameRepo.save(gameWithImage)).thenReturn(gameWithImage);
 
             // ACT
             RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);

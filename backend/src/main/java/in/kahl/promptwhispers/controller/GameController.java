@@ -51,6 +51,12 @@ public class GameController {
         return gameService.submitPrompt(principal, gameId, prompt);
     }
 
+    @PostMapping("{gameId}/generateImage")
+    @ResponseStatus(HttpStatus.CREATED)
+    public RoundResponse generateImage(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        return gameService.generateImage(principal, gameId);
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage handleGameNotFound() {

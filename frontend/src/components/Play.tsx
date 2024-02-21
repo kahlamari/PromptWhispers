@@ -30,6 +30,18 @@ export default function Play() {
     }
   };
 
+  const requestImageGeneration = async (): Promise<Round | undefined> => {
+    try {
+      const response = await axios.post<Round>(
+        `/api/games/${gameId}/generateImage`,
+      );
+      return response.data;
+    } catch (e) {
+      console.log(e);
+      return undefined;
+    }
+  };
+
   const getRound = (gameId: string) => {
     axios.get<Round>(`/api/games/${gameId}`).then((response) => {
       const freshRound = response.data;
@@ -64,6 +76,7 @@ export default function Play() {
     setInputDisabled(true);
     setWaitingForImage(true);
     submitPrompt(promptToSubmit).then((response) => {
+      requestImageGeneration();
       if (response?.gameState === "REQUEST_NEW_PROMPTS") {
         setPrompt("");
         setInputDisabled(false);

@@ -89,12 +89,10 @@ public class GameService {
         Turn newPrompt = promptCreate.asNewPromptTurn().withPlayer(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
-        gameRepo.save(gameWithPrompt);
-
-        return generateImage(principal, gameWithPrompt.id());
+        return gameRepo.save(gameWithPrompt).asRoundResponse(user);
     }
 
-    private RoundResponse generateImage(OAuth2User principal, String gameId) {
+    public RoundResponse generateImage(OAuth2User principal, String gameId) {
         User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
