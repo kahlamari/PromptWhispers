@@ -10,79 +10,38 @@ export default function Play() {
   const gameId: string | undefined = params.gameId;
 
   const [prompt, setPrompt] = useState<string>("");
-  const [round, setRound] = useState<Round>();
+  const [round, setRound] = useState<Round | undefined>(undefined);
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [waitingForImage, setWaitingForImage] = useState<boolean>(false);
-
-  const submitPrompt = async (
-    promptToSubmit: PromptCreate,
-  ): Promise<Round | undefined> => {
-    try {
-      const response = await axios.post<Round>(
-        `/api/games/${gameId}/prompt`,
-        promptToSubmit,
-      );
-      setRound(response.data);
-      return response.data;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  };
-
-  const requestImageGeneration = async (): Promise<Round | undefined> => {
-    try {
-      const response = await axios.post<Round>(
-        `/api/games/${gameId}/generateImage`,
-      );
-      return response.data;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  };
-
-  const getRound = (gameId: string) => {
-    axios.get<Round>(`/api/games/${gameId}`).then((response) => {
-      const freshRound = response.data;
-      setRound(freshRound);
-      console.log(
-        "GetRound: " + freshRound.gameState + inputDisabled + waitingForImage,
-      );
-      if (freshRound.gameState === "REQUEST_NEW_PROMPTS") {
-        console.log("REQUEST_NEW_PROMPTS");
-        setPrompt("");
-        setInputDisabled(false);
-        setWaitingForImage(false);
-      } else if (freshRound.gameState === "WAIT_FOR_IMAGES") {
-        console.log("WAIT_FOR_IMAGES");
-      } else if (freshRound.gameState === "WAIT_FOR_PROMPTS") {
-        console.log("WAIT_FOR_PROMPT");
-      }
-    });
-  };
+  const [shouldPoll, setShouldPoll] = useState<boolean>(false);
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
 
+  const submitPrompt = (promptToSubmit: PromptCreate) => {
+    axios
+      .post<Round>(`/api/games/${gameId}/prompt`, promptToSubmit)
+      .then((response) => setRound(response.data));
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setInputDisabled(true);
+    setWaitingForImage(true);
 
     const promptToSubmit: PromptCreate = {
       prompt,
     };
 
-    setInputDisabled(true);
-    setWaitingForImage(true);
-    submitPrompt(promptToSubmit).then((response) => {
-      requestImageGeneration();
-      if (response?.gameState === "REQUEST_NEW_PROMPTS") {
-        setPrompt("");
-        setInputDisabled(false);
-        setWaitingForImage(false);
-      }
-    });
+    submitPrompt(promptToSubmit);
+    requestImageGeneration();
+  };
+
+  const requestImageGeneration = () => {
+    axios
+      .post<Round>(`/api/games/${gameId}/generateImage`)
+      .then((response) => setRound(response.data));
   };
 
   const getLastImage = (): Turn | undefined => {
@@ -104,21 +63,42 @@ export default function Play() {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("In UseEffect: " + round?.gameState);
-      if (
-        gameId &&
-        round?.gameState !== "REQUEST_NEW_PROMPTS" &&
-        round?.gameState !== "FINISHED"
-      ) {
-        getRound(gameId);
-      }
-    }, 5000);
+    const getRound = () => {
+      axios
+        .get<Round>(`/api/games/${gameId}`)
+        .then((response) => setRound(response.data));
 
-    return () => {
-      clearInterval(interval);
+      if (shouldPoll) {
+        setTimeout(getRound, 5000);
+      }
     };
-  }, [gameId, round]);
+
+    getRound();
+
+    return () => setShouldPoll(false);
+  }, [gameId, shouldPoll]);
+
+  useEffect(() => {
+    if (round !== undefined) {
+      if (round.gameState === "REQUEST_NEW_PROMPTS") {
+        console.log("REQUEST_NEW_PROMPTS");
+        setShouldPoll(false);
+        setPrompt("");
+        setInputDisabled(false);
+        setWaitingForImage(false);
+      } else if (round.gameState === "WAIT_FOR_IMAGES" && !shouldPoll) {
+        setShouldPoll(true);
+        console.log("WAIT_FOR_IMAGES");
+      } else if (round.gameState === "WAIT_FOR_PROMPTS" && !shouldPoll) {
+        setShouldPoll(true);
+        console.log("WAIT_FOR_PROMPT");
+      }
+    }
+  }, [round]);
+
+  if (round == undefined) {
+    return <div>Loading</div>;
+  }
 
   return (
     <div className="flex flex-col items-center">
