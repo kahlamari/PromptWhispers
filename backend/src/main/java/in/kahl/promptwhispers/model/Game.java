@@ -48,7 +48,7 @@ public record Game(
     }
 
     public Game withPlayer(User player) {
-        if (!players().contains(player)) {
+        if (players().stream().noneMatch(p -> p.id().equals(player.id()))) {
             players().add(player);
         }
 

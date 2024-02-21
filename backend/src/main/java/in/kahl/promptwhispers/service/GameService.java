@@ -42,7 +42,8 @@ public class GameService {
 
         Game newGame = new Game(host);
 
-        for (User player : lobby.players()) {
+        for (User playerInLobby : lobby.players()) {
+            User player = userService.getUserById(playerInLobby.id());
             newGame = newGame.withPlayer(player);
             userService.save(player.withGameId(newGame.id()));
         }

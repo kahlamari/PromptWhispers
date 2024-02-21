@@ -185,28 +185,23 @@ class GameServiceTest {
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId,
                     gameWithOutPrompt.get().players(),
                     new HashMap<>(Map.of(0, List.of(new Turn(testUser, TurnType.PROMPT, promptInput)))),
-                    gameWithOutPrompt.get().gameState(),
+                    GameState.REQUEST_NEW_PROMPTS,
                     gameWithOutPrompt.get().createdAt()));
-            when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt)
-                    .thenReturn(gameWithPrompt);
+            when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
 
-            when(gameRepo.save(gameWithPrompt.get())).thenReturn(gameWithPrompt.get());
+            when(gameRepo.save(any(Game.class))).thenReturn(gameWithPrompt.get());
 
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
-            // part of Method "generateImage"
-            String imageUrl = "https://example.com/image.png";
-            when(dalleService.getGeneratedImageUrl(promptInput)).thenReturn(imageUrl);
-            when(cloudinaryService.uploadImage(imageUrl)).thenReturn(imageUrl);
-
-            Game gameWithImage = gameWithPrompt.get().withTurn(new Turn(testUser, TurnType.IMAGE, imageUrl));
-            //when(gameRepo.save(gameWithImage)).thenReturn(gameWithImage);
 
             // ACT
             RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
             // ASSERT
             assertEquals(gameWithPrompt.get().asRoundResponse(testUser), actualRoundWithPrompt);
+            verify(userService).getLoggedInUser(mockedPrincipal);
+            verifyNoMoreInteractions(userService);
+
             verify(gameRepo).findById(gameId);
             verify(gameRepo).save(gameWithPrompt.get());
             verifyNoMoreInteractions(gameRepo);
@@ -216,7 +211,6 @@ class GameServiceTest {
     @Test
     void generateImageTest_whenGameIdProvided_thenGenerateImage() {
         // ARRANGE
-        /*
         Instant time = Instant.now();
         UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -224,6 +218,10 @@ class GameServiceTest {
              MockedStatic<UUID> mockedUUID = Mockito.mockStatic(UUID.class)) {
             mockedInstant.when(Instant::now).thenReturn(time);
             mockedUUID.when(UUID::randomUUID).thenReturn(mockUUID);
+
+            OAuth2User mockedPrincipal = mock(OAuth2User.class);
+            User testUser = new User(userEmail);
+            when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
 
             String gameId = "1";
             String promptInput = "Sheep jumps over hedge";
@@ -242,21 +240,22 @@ class GameServiceTest {
 
             Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
             Game gameWithImageUrl = new Game(gameId, List.of(user),
-                    Map.of(0, List.of(prompt, generatedImage)), GameState.WAIT_FOR_PROMPTS, time);
-            when(gameRepo.save(gameWithImageUrl)).thenReturn(gameWithImageUrl);
+                    Map.of(0, List.of(prompt, generatedImage)), GameState.FINISHED, time);
+            when(gameRepo.save(any(Game.class))).thenReturn(gameWithImageUrl);
 
             // ACT
-            RoundResponse roundResponseActual = serviceUnderTest.generateImage(gameId);
+            RoundResponse roundResponseActual = serviceUnderTest.generateImage(mockedPrincipal, gameId);
 
             // ASSERT
             assertEquals(gameWithImageUrl.asRoundResponse(), roundResponseActual);
-            verify(gameRepo).findById(gameId);
+            verify(gameRepo, times(2)).findById(gameId);
             verify(gameRepo).save(gameWithImageUrl);
             verifyNoMoreInteractions(gameRepo);
             verify(dalleService).getGeneratedImageUrl(promptInput);
             verifyNoMoreInteractions(dalleService);
+            verify(cloudinaryService).uploadImage(imageUrl);
+            verifyNoMoreInteractions(cloudinaryService);
         }
-         */
     }
 
     @Test
