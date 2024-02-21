@@ -12,7 +12,6 @@ export default function Play() {
   const [prompt, setPrompt] = useState<string>("");
   const [round, setRound] = useState<Round | undefined>(undefined);
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
-  const [waitingForImage, setWaitingForImage] = useState<boolean>(false);
   const [shouldPoll, setShouldPoll] = useState<boolean>(false);
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -25,10 +24,15 @@ export default function Play() {
       .then((response) => setRound(response.data));
   };
 
+  const requestImageGeneration = () => {
+    axios
+      .post<Round>(`/api/games/${gameId}/generateImage`)
+      .then((response) => setRound(response.data));
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setInputDisabled(true);
-    setWaitingForImage(true);
 
     const promptToSubmit: PromptCreate = {
       prompt,
@@ -36,12 +40,6 @@ export default function Play() {
 
     submitPrompt(promptToSubmit);
     requestImageGeneration();
-  };
-
-  const requestImageGeneration = () => {
-    axios
-      .post<Round>(`/api/games/${gameId}/generateImage`)
-      .then((response) => setRound(response.data));
   };
 
   const getLastImage = (): Turn | undefined => {
@@ -75,17 +73,19 @@ export default function Play() {
 
     getRound();
 
-    return () => setShouldPoll(false);
+    return () => {
+      console.log("useEffect exit");
+      setShouldPoll(false);
+    };
   }, [gameId, shouldPoll]);
 
   useEffect(() => {
     if (round !== undefined) {
-      if (round.gameState === "REQUEST_NEW_PROMPTS") {
+      if (round.gameState === "REQUEST_NEW_PROMPTS" && shouldPoll) {
         console.log("REQUEST_NEW_PROMPTS");
         setShouldPoll(false);
         setPrompt("");
         setInputDisabled(false);
-        setWaitingForImage(false);
       } else if (round.gameState === "WAIT_FOR_IMAGES" && !shouldPoll) {
         setShouldPoll(true);
         console.log("WAIT_FOR_IMAGES");
@@ -93,6 +93,8 @@ export default function Play() {
         setShouldPoll(true);
         console.log("WAIT_FOR_PROMPT");
       }
+    } else {
+      console.log(round);
     }
   }, [round]);
 
