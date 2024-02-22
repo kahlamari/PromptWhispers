@@ -48,7 +48,11 @@ export default function Play() {
   const getLastImage = (): Turn | undefined => {
     if (round) {
       // Due to the game's logic there needs to be a prompt before there can be an image
-      if (round.turns.length < 2) {
+      if (
+        round.gameState === "WAIT_FOR_IMAGES" ||
+        round.gameState === "WAIT_FOR_PROMPTS" ||
+        round.turns.length < 2
+      ) {
         return undefined;
       }
       const lastTurn: Turn = round.turns[round.turns.length - 1];
@@ -66,12 +70,11 @@ export default function Play() {
   useEffect(() => {
     const interval = setInterval(() => {
       const getRound = () => {
-        axios.get<Round>(`/api/games/${gameId}`).then((response) => {
-          const roundData = response.data;
-          setRound(roundData);
-        });
+        axios
+          .get<Round>(`/api/games/${gameId}`)
+          .then((response) => setRound(response.data));
       };
-      console.log("Inside Interval");
+
       if (shouldPoll) {
         getRound();
       }
@@ -86,13 +89,13 @@ export default function Play() {
     };
   }, [gameId, shouldPoll, isGameRunning]);
 
+  // update the page based on the game's state
   useEffect(() => {
     if (round) {
       if (
         round.gameState === "REQUEST_NEW_PROMPTS" ||
         round.gameState === "FINISHED"
       ) {
-        console.log("(setting poll to false) gamestate: " + round.gameState);
         setShouldPoll(false);
         setPrompt("");
         setInputDisabled(false);
@@ -100,7 +103,6 @@ export default function Play() {
           setIsGameRunning(false);
         }
       } else {
-        console.log("gamestate: " + round.gameState);
         setShouldPoll(true);
       }
     }
