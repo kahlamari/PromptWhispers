@@ -53,7 +53,7 @@ export default function GameHistory() {
               >
                 {game.id}
               </th>
-              <td className="px-6 py-4">{game.rounds[0].length}</td>
+              <td className="px-6 py-4">N/A</td>
               <td className="px-6 py-4">
                 {game.gameState === "FINISHED" ? "Completed" : "Not finished"}
               </td>
