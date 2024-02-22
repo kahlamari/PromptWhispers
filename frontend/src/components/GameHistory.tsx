@@ -53,9 +53,9 @@ export default function GameHistory() {
               >
                 {game.id}
               </th>
-              <td className="px-6 py-4">{game.turns.length}</td>
+              <td className="px-6 py-4">{game.rounds[0].length}</td>
               <td className="px-6 py-4">
-                {game.isFinished ? "Completed" : "Not finished"}
+                {game.gameState === "FINISHED" ? "Completed" : "Not finished"}
               </td>
               <td className="px-6 py-4">
                 <button onClick={() => deleteGame(game.id)}>Delete</button>

@@ -21,11 +21,11 @@ export default function GameReply() {
 
   return (
     <div className="flex flex-col items-center">
-      {game?.turns.map((step) => (
-        <div key={step.id}>
-          {step.type === "PROMPT" ? (
+      {game?.rounds[0].map((turn) => (
+        <div key={turn.id}>
+          {turn.type === "PROMPT" ? (
             <textarea
-              value={step.content}
+              value={turn.content}
               rows={2}
               placeholder="The potato king leads an uprising"
               autoFocus={true}
@@ -36,7 +36,7 @@ export default function GameReply() {
             <img
               className="h-128 w-auto rounded-2xl"
               alt="generated based on previous prompt"
-              src={step.content}
+              src={turn.content}
             />
           )}
         </div>
