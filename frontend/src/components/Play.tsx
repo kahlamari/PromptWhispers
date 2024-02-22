@@ -1,5 +1,4 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Turn } from "../types/Turn.ts";
@@ -19,9 +18,14 @@ export default function Play() {
     setPrompt(event.target.value);
   };
 
-  const submitPrompt = (promptToSubmit: PromptCreate) => {
+  const submitPrompt = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setInputDisabled(true);
+
     axios
-      .post<Round>(`/api/games/${gameId}/prompt`, promptToSubmit)
+      .post<Round>(`/api/games/${gameId}/prompt`, {
+        prompt,
+      })
       .then((response) => {
         setRound(response.data);
         requestImageGeneration();
@@ -32,17 +36,6 @@ export default function Play() {
     axios
       .post<Round>(`/api/games/${gameId}/generateImage`)
       .then((response) => setRound(response.data));
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setInputDisabled(true);
-
-    const promptToSubmit: PromptCreate = {
-      prompt,
-    };
-
-    submitPrompt(promptToSubmit);
   };
 
   const getLastImage = (): Turn | undefined => {
@@ -123,7 +116,7 @@ export default function Play() {
       )}
       {!isGameFinished() && (
         <div className="mt-5">
-          <form onSubmit={handleSubmit} className="flex">
+          <form onSubmit={submitPrompt} className="flex">
             <textarea
               value={prompt}
               onChange={onPromptChange}
