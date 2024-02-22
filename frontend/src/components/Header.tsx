@@ -18,7 +18,9 @@ export default function Header(props: HeaderProps) {
 
   return (
     <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3 text-indigo-50">
-      <div className="text-2xl font-extralight">Prompt Whispers</div>
+      <div className="text-2xl font-extralight">
+        <Link to="/">Prompt Whispers</Link>
+      </div>
       <Link to="/games">Games</Link>
 
       {!props.user && (

@@ -2,7 +2,7 @@ import { Turn } from "./Turn.ts";
 
 export type Game = {
   id: string;
-  turns: Turn[];
+  turns: { [key: number]: Turn[] };
   createdAt: Date;
-  isFinished: boolean;
+  gameState: "NEW" | "PROMPT_PHASE" | "IMAGE_PHASE" | "FINISHED";
 };

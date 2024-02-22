@@ -49,6 +49,10 @@ public class UserService {
         return new UserResponse(loggedInUser);
     }
 
+    public User getUserById(String playerId) {
+        return userRepo.findById(playerId).orElseThrow(NoSuchElementException::new);
+    }
+
     public boolean saveNewUser(OAuth2User oAuth2User) {
         String userEmail = oAuth2User.getAttribute("email");
 

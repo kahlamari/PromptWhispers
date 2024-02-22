@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.GameState;
+import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.User;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
@@ -45,50 +49,57 @@ class GameIntegrationTest {
     @DirtiesContext
     void createGameTest_whenCalled_thenReturnGame() throws Exception {
         // ACT
-        mockMvc.perform(post("/api/games/start")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+        User host = userRepo.getUserByEmail(userEmail);
+        Lobby lobby = new Lobby(host);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
 
+        mockMvc.perform(post("/api/games")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", host.email())))
+                        .content(lobbyAsJSON))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.gameId").isNotEmpty())
                 .andExpect(jsonPath("$.turns").isEmpty())
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)));
+                .andExpect(jsonPath("$.gameState", is(GameState.REQUEST_NEW_PROMPTS.toString())));
     }
 
     @Test
     @DirtiesContext
     void getGameTest_whenGameExists_thenReturnGame() throws Exception {
         // ARRANGE
-        String saveArrangeResult = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        Lobby lobby = new Lobby(host);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
+
+        String saveArrangeResult = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", host.email())))
+                        .content(lobbyAsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Game gameExpected = objectMapper.readValue(saveArrangeResult, Game.class);
+        RoundResponse gameExpected = objectMapper.readValue(saveArrangeResult, RoundResponse.class);
 
         // ACT
-        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.id())
+        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.gameId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
 
                 // ASSERT
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.gameId").isNotEmpty())
                 .andExpect(jsonPath("$.turns").isEmpty())
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)))
+                .andExpect(jsonPath("$.gameState", is(GameState.REQUEST_NEW_PROMPTS.toString())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Game game = objectMapper.readValue(saveResult, Game.class);
-        assertEquals(gameExpected.id(), game.id());
+        RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
+        assertEquals(gameExpected.gameId(), game.gameId());
         assertEquals(gameExpected.turns(), game.turns());
-        assertEquals(gameExpected.isFinished(), game.isFinished());
+        assertEquals(gameExpected.gameState(), game.gameState());
     }
 
     @Test
@@ -110,22 +121,33 @@ class GameIntegrationTest {
     @DirtiesContext
     void getAllGamesTest_whenRequestGames_thenReturnGames() throws Exception {
         // ARRANGE
-        String game1Result = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        User bob = new User("bob@example.com");
+        userRepo.save(bob);
+        Lobby lobby1 = new Lobby(host).withPlayer(bob);
+        String lobby1AsJSON = objectMapper.writeValueAsString(lobby1);
+        Lobby lobby2 = new Lobby(host).withPlayer(bob);
+        String lobby2AsJSON = objectMapper.writeValueAsString(lobby2);
+
+
+        String game1Result = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", host.email())))
+                        .content(lobby1AsJSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
+
+        String game2Result = mockMvc.perform(post("/api/games")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", host.email())))
+                        .content(lobby2AsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        String game2Result = mockMvc.perform(post("/api/games/start")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        Game game1 = objectMapper.readValue(game1Result, Game.class);
-        Game game2 = objectMapper.readValue(game2Result, Game.class);
+        RoundResponse game2 = objectMapper.readValue(game2Result, RoundResponse.class);
 
         // ACT
         String gameListResult = mockMvc.perform(get("/api/games")
@@ -142,32 +164,31 @@ class GameIntegrationTest {
         List<Game> gameListActual = objectMapper.readValue(gameListResult, new TypeReference<>() {
         });
 
-        assertEquals(List.of(game1, game2), gameListActual);
+        List<String> gameIdListActual = gameListActual.stream().map(Game::id).toList();
+
+        assertEquals(List.of(game1.gameId(), game2.gameId()), gameIdListActual);
     }
 
     @Test
     @DirtiesContext
     void deleteGameTest_whenGameExists_thenRemoveGame() throws Exception {
         // ARRANGE
-        String game1Result = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        Lobby lobby = new Lobby(host);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
+
+        String game1Result = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", host.email())))
+                        .content(lobbyAsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        String game2Result = mockMvc.perform(post("/api/games/start")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        Game game1 = objectMapper.readValue(game1Result, Game.class);
-        Game game2 = objectMapper.readValue(game2Result, Game.class);
+        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
 
         // ACT
-        mockMvc.perform(delete("/api/games/" + game1.id())
+        mockMvc.perform(delete("/api/games/" + game1.gameId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
 
@@ -176,28 +197,34 @@ class GameIntegrationTest {
 
         List<String> gameListActual = userRepo.getUserByEmail(userEmail).gameIds();
 
-        assertEquals(List.of(game2.id()), gameListActual);
-        assertEquals(1, gameListActual.size());
+        assertEquals(0, gameListActual.size());
     }
 
     @Test
     @DirtiesContext
     void deleteGameTest_whenUserNotOwner_thenThrowException() throws Exception {
         // ARRANGE
-        String game1Result = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        User bob = userRepo.save(new User("bob@example.com"));
+        Lobby lobby = new Lobby(host);
+        lobby = lobby.withPlayer(bob);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
+
+        String game1Result = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
+                        .content(lobbyAsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Game game1 = objectMapper.readValue(game1Result, Game.class);
+        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
 
         User userWithoutGame = new User("2" + userEmail);
         userRepo.save(userWithoutGame);
 
         // ACT
-        mockMvc.perform(delete("/api/games/" + game1.id())
+        mockMvc.perform(delete("/api/games/" + game1.gameId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userWithoutGame.email()))))
 
@@ -210,29 +237,36 @@ class GameIntegrationTest {
 
     @Test
     @DirtiesContext
-    void submitPromptTest_whenPromptSubmitted_thenPromptSaved() throws Exception {
+    void submitPromptTest_whenSubmitPrompt_thenReturnRoundWithPrompt() throws Exception {
         // ARRANGE
-        String saveResult = mockMvc.perform(post("/api/games/start")
+        User host = userRepo.getUserByEmail(userEmail);
+        User bob = userRepo.save(new User("bob@example.com"));
+        Lobby lobby = new Lobby(host);
+        lobby = lobby.withPlayer(bob);
+        String lobbyAsJSON = objectMapper.writeValueAsString(lobby);
+
+        String saveResult = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
+                        .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
+                        .content(lobbyAsJSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        String gameId = JsonPath.parse(saveResult).read("$.id");
+        String gameId = JsonPath.parse(saveResult).read("$.gameId");
 
         // ACT
-        mockMvc.perform(post("/api/games/" + gameId + "/prompt")
+        MvcResult result = mockMvc.perform(post("/api/games/" + gameId + "/prompt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                         .content("""
                                    {"prompt": "Goat jumps over a hedge."}
                                 """))
                 // ASSERT
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.gameId").isNotEmpty())
                 .andExpect(jsonPath("$.turns").isNotEmpty())
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.isFinished", is(false)));
+                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())))
+                .andReturn();
     }
 }

@@ -63,7 +63,7 @@ class LobbyServiceTest {
         // ARRANGE
         String id = "1";
         User testUser = new User(userEmail);
-        Optional<Lobby> expectedLobby = Optional.of(new Lobby(id, testUser, List.of(testUser), false, false, Instant.now()));
+        Optional<Lobby> expectedLobby = Optional.of(new Lobby(id, testUser, List.of(testUser), null, false, false, Instant.now()));
         when(lobbyRepo.findById(id)).thenReturn(expectedLobby);
 
         // ACT
@@ -98,10 +98,10 @@ class LobbyServiceTest {
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(playerToJoin);
 
-        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, new ArrayList<>(List.of(playerHost, playerAlreadyJoined)), false, false, Instant.now()));
+        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, new ArrayList<>(List.of(playerHost, playerAlreadyJoined)), null, false, false, Instant.now()));
         when(lobbyRepo.findById(lobbyInput.get().id())).thenReturn(lobbyInput);
 
-        Lobby lobbyExpected = new Lobby(lobbyInput.get().id(), playerHost, List.of(playerHost, playerAlreadyJoined, playerToJoin), false, false, lobbyInput.get().createdAt());
+        Lobby lobbyExpected = new Lobby(lobbyInput.get().id(), playerHost, List.of(playerHost, playerAlreadyJoined, playerToJoin), null, false, false, lobbyInput.get().createdAt());
         when(lobbyRepo.save(lobbyExpected)).thenReturn(lobbyExpected);
 
         // ACT
@@ -124,10 +124,10 @@ class LobbyServiceTest {
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(playerToLeave);
 
-        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, new ArrayList<>(List.of(playerHost, playerAlreadyJoined, playerToLeave)), false, false, Instant.now()));
+        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, new ArrayList<>(List.of(playerHost, playerAlreadyJoined, playerToLeave)), null, false, false, Instant.now()));
         when(lobbyRepo.findById(lobbyInput.get().id())).thenReturn(lobbyInput);
 
-        Lobby lobbyExpected = new Lobby(lobbyInput.get().id(), playerHost, List.of(playerHost, playerAlreadyJoined), false, false, lobbyInput.get().createdAt());
+        Lobby lobbyExpected = new Lobby(lobbyInput.get().id(), playerHost, List.of(playerHost, playerAlreadyJoined), null, false, false, lobbyInput.get().createdAt());
         when(lobbyRepo.save(lobbyExpected)).thenReturn(lobbyExpected);
 
         // ACT
@@ -147,7 +147,7 @@ class LobbyServiceTest {
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(playerHost);
 
-        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, List.of(playerHost), false, false, Instant.now()));
+        Optional<Lobby> lobbyInput = Optional.of(new Lobby("1", playerHost, List.of(playerHost), null, false, false, Instant.now()));
         when(lobbyRepo.findById(lobbyInput.get().id())).thenReturn(lobbyInput);
 
         // ACT
@@ -165,7 +165,7 @@ class LobbyServiceTest {
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(host);
 
-        Optional<Lobby> lobbyToDelete = Optional.of(new Lobby(id, host, List.of(host), false, false, Instant.now()));
+        Optional<Lobby> lobbyToDelete = Optional.of(new Lobby(id, host, List.of(host), null, false, false, Instant.now()));
         when(lobbyRepo.findById(id)).thenReturn(lobbyToDelete);
         doNothing().when(lobbyRepo).delete(lobbyToDelete.get());
 
@@ -190,7 +190,7 @@ class LobbyServiceTest {
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
         when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(notHost);
 
-        Optional<Lobby> lobbyToDelete = Optional.of(new Lobby(id, host, List.of(host), false, false, Instant.now()));
+        Optional<Lobby> lobbyToDelete = Optional.of(new Lobby(id, host, List.of(host), null, false, false, Instant.now()));
         when(lobbyRepo.findById(id)).thenReturn(lobbyToDelete);
 
         // ACT

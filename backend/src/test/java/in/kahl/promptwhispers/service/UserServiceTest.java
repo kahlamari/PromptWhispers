@@ -150,10 +150,10 @@ class UserServiceTest {
     @Test
     void getAllGamesTest_whenGamesExists_thenReturnGames() {
         // ARRANGE
-        Game testGame1 = new Game();
-        Game testGame2 = new Game();
-        User testUser = new User(userEmail)
-                .withGame(testGame1)
+        User testUser = new User(userEmail);
+        Game testGame1 = new Game(testUser);
+        Game testGame2 = new Game(testUser);
+        testUser = testUser.withGame(testGame1)
                 .withGame(testGame2);
 
         when(userRepo.findById(testUser.id())).thenReturn(Optional.of(testUser));
@@ -179,10 +179,10 @@ class UserServiceTest {
     @Test
     void removeGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
-        Game testGame1 = new Game();
-        Game testGameToDelete = new Game();
-        User userExpected = new User(userEmail)
-                .withGame(testGame1);
+        User userExpected = new User(userEmail);
+        Game testGame1 = new Game(userExpected);
+        Game testGameToDelete = new Game(userExpected);
+        userExpected = userExpected.withGame(testGame1);
 
         User testUser = userExpected.withGame(testGameToDelete);
 

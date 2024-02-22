@@ -2,7 +2,9 @@ package in.kahl.promptwhispers.controller;
 
 import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Game;
+import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
+import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,15 +23,15 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("start")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Game createGame(@AuthenticationPrincipal OAuth2User principal) {
-        return gameService.createGame(principal);
+    public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
+        return gameService.createGame(principal, lobby);
     }
 
     @GetMapping("{gameId}")
-    public Game getGame(@PathVariable String gameId) {
-        return gameService.getGameById(gameId);
+    public RoundResponse getGame(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        return gameService.getGameById(principal, gameId);
     }
 
     @GetMapping()
@@ -44,14 +46,15 @@ public class GameController {
     }
 
     @PostMapping("{gameId}/prompt")
-    public Game submitPrompt(@PathVariable String gameId, @RequestBody PromptCreate prompt) {
-        return gameService.submitPrompt(gameId, prompt);
+    @ResponseStatus(HttpStatus.CREATED)
+    public RoundResponse submitPrompt(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId, @RequestBody PromptCreate prompt) {
+        return gameService.submitPrompt(principal, gameId, prompt);
     }
 
     @PostMapping("{gameId}/generateImage")
     @ResponseStatus(HttpStatus.CREATED)
-    public Game generateImage(@PathVariable String gameId) {
-        return gameService.generateImage(gameId);
+    public RoundResponse generateImage(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+        return gameService.generateImage(principal, gameId);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
