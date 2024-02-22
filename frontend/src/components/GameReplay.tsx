@@ -3,7 +3,7 @@ import { Game } from "../types/Game.ts";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-export default function GameReply() {
+export default function GameReplay() {
   const params = useParams();
   const gameId: string | undefined = params.gameId;
   const [game, setGame] = useState<Game | undefined | null>(undefined);
