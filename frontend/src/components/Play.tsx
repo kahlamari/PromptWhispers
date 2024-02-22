@@ -12,7 +12,8 @@ export default function Play() {
   const [prompt, setPrompt] = useState<string>("");
   const [round, setRound] = useState<Round | undefined>(undefined);
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
-  const [shouldPoll, setShouldPoll] = useState<boolean>(false);
+  const [shouldPoll, setShouldPoll] = useState<boolean>(true);
+  const [isGameRunning, setIsGameRunning] = useState<boolean>(true);
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -21,14 +22,16 @@ export default function Play() {
   const submitPrompt = (promptToSubmit: PromptCreate) => {
     axios
       .post<Round>(`/api/games/${gameId}/prompt`, promptToSubmit)
-      .then((response) => setRound(response.data));
+      .then((response) => {
+        setRound(response.data);
+        requestImageGeneration();
+      });
   };
 
   const requestImageGeneration = () => {
-    axios.post<Round>(`/api/games/${gameId}/generateImage`).then((response) => {
-      setRound(response.data);
-      setupPage(response.data);
-    });
+    axios
+      .post<Round>(`/api/games/${gameId}/generateImage`)
+      .then((response) => setRound(response.data));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -40,7 +43,6 @@ export default function Play() {
     };
 
     submitPrompt(promptToSubmit);
-    requestImageGeneration();
   };
 
   const getLastImage = (): Turn | undefined => {
@@ -61,57 +63,55 @@ export default function Play() {
     return round?.gameState === "FINISHED";
   };
 
-  const setupPage = (roundToConsider: Round) => {
-    if (roundToConsider !== undefined) {
-      if (roundToConsider.gameState === "REQUEST_NEW_PROMPTS" && shouldPoll) {
-        console.log("REQUEST_NEW_PROMPTS");
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const getRound = () => {
+        axios.get<Round>(`/api/games/${gameId}`).then((response) => {
+          const roundData = response.data;
+          setRound(roundData);
+        });
+      };
+      console.log("Inside Interval");
+      if (shouldPoll) {
+        getRound();
+      }
+    }, 5000);
+
+    if (!isGameRunning) {
+      clearInterval(interval);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [gameId, shouldPoll, isGameRunning]);
+
+  useEffect(() => {
+    if (round) {
+      if (
+        round.gameState === "REQUEST_NEW_PROMPTS" ||
+        round.gameState === "FINISHED"
+      ) {
+        console.log("(setting poll to false) gamestate: " + round.gameState);
         setShouldPoll(false);
         setPrompt("");
         setInputDisabled(false);
-      } else if (
-        roundToConsider.gameState === "WAIT_FOR_IMAGES" &&
-        !shouldPoll
-      ) {
+        if (round.gameState === "FINISHED") {
+          setIsGameRunning(false);
+        }
+      } else {
+        console.log("gamestate: " + round.gameState);
         setShouldPoll(true);
-        console.log("WAIT_FOR_IMAGES");
-      } else if (
-        roundToConsider.gameState === "WAIT_FOR_PROMPTS" &&
-        !shouldPoll
-      ) {
-        setShouldPoll(true);
-        console.log("WAIT_FOR_PROMPT");
       }
-    } else {
-      console.log(roundToConsider);
     }
-  };
-
-  useEffect(() => {
-    const getRound = () => {
-      axios.get<Round>(`/api/games/${gameId}`).then((response) => {
-        setRound(response.data);
-        setupPage(response.data);
-      });
-
-      if (shouldPoll) {
-        setTimeout(getRound, 5000);
-      }
-    };
-
-    getRound();
-
-    return () => {
-      console.log("useEffect exit");
-      setShouldPoll(false);
-    };
-  }, [gameId, shouldPoll]);
+  }, [round]);
 
   if (round == undefined) {
     return <div>Loading</div>;
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="mt-5 flex flex-col items-center">
       {getLastImage() && (
         <img
           className="h-128 w-auto rounded-2xl"
@@ -120,16 +120,13 @@ export default function Play() {
         />
       )}
       {!isGameFinished() && (
-        <>
-          <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
-            Enter your prompt!
-          </h1>
+        <div className="mt-5">
           <form onSubmit={handleSubmit} className="flex">
             <textarea
               value={prompt}
               onChange={onPromptChange}
               rows={2}
-              placeholder="The potato king leads an uprising"
+              placeholder="Enter your prompt!"
               autoFocus={true}
               disabled={inputDisabled}
               className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
@@ -142,7 +139,7 @@ export default function Play() {
               Done
             </button>
           </form>
-        </>
+        </div>
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
