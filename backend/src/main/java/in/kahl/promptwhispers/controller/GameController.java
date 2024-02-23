@@ -34,6 +34,11 @@ public class GameController {
         return gameService.getGameById(principal, gameId);
     }
 
+    @GetMapping("{gameId}/all")
+    public Game getGameAll(@PathVariable String gameId) {
+        return gameService.getGameAllById(gameId);
+    }
+
     @GetMapping()
     public List<Game> getAllGames(@AuthenticationPrincipal OAuth2User principal) {
         return gameService.getGamesByUser(principal);
