@@ -53,11 +53,11 @@ export default function GameHistory() {
           {games.map((game) => (
             <tr
               key={game.id}
-              onClick={() => navigate(`${game.id}`)}
               className="cursor-pointer border-b bg-white dark:border-gray-700 dark:bg-gray-800"
             >
               <th
                 scope="row"
+                onClick={() => navigate(`${game.id}`)}
                 className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
               >
                 {game.id}
