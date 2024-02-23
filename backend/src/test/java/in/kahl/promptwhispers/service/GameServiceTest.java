@@ -36,7 +36,7 @@ class GameServiceTest {
     }
 
     private Game createEmptyGame() {
-        return new Game(new User(userEmail));
+        return new Game().withPlayer(new User(userEmail));
     }
 
     @Test
@@ -57,7 +57,7 @@ class GameServiceTest {
 
             Lobby testLobby = new Lobby(testUser);
 
-            Game expected = new Game(testUser)
+            Game expected = new Game().withPlayer(testUser)
                     .withPlayer(testUser)
                     .withGameState(GameState.REQUEST_NEW_PROMPTS);
 
@@ -67,7 +67,7 @@ class GameServiceTest {
             RoundResponse actual = serviceUnderTest.createGame(mockedPrincipal, testLobby);
 
             // ASSERT
-            assertEquals(expected.asRoundResponse(), actual);
+            assertEquals(expected.asRoundResponse(testUser), actual);
             verify(gameRepo).save(expected);
             verifyNoMoreInteractions(gameRepo);
         }
@@ -87,7 +87,7 @@ class GameServiceTest {
         RoundResponse actualGame = serviceUnderTest.getGameById(mockedPrincipal, expectedGame.get().id());
 
         // ASSERT
-        assertEquals(expectedGame.get().asRoundResponse(), actualGame);
+        assertEquals(expectedGame.get().asRoundResponse(testUser), actualGame);
         verify(gameRepo).findById(expectedGame.get().id());
         verifyNoMoreInteractions(gameRepo);
     }
@@ -113,8 +113,8 @@ class GameServiceTest {
     void deleteGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
         User user = new User(userEmail);
-        Game testGameToDelete = new Game(user);
-        Game testGameToKeep = new Game(user);
+        Game testGameToDelete = new Game().withPlayer(user);
+        Game testGameToKeep = new Game().withPlayer(user);
 
         User userExpected = user.withGame(testGameToDelete);
 
@@ -146,8 +146,8 @@ class GameServiceTest {
     void deleteGameTest_whenUserDoesNotOwnGame_thenThrowException() {
         // ARRANGE
         User testUser = new User(userEmail);
-        Game testGameToDelete = new Game(testUser);
-        Game testGameToKeep = new Game(testUser);
+        Game testGameToDelete = new Game().withPlayer(testUser);
+        Game testGameToKeep = new Game().withPlayer(testUser);
         testUser = testUser.withGame(testGameToKeep);
 
         OAuth2User mockedPrincipal = mock(OAuth2User.class);
@@ -184,7 +184,7 @@ class GameServiceTest {
 
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId,
                     gameWithOutPrompt.get().players(),
-                    new HashMap<>(Map.of(0, List.of(new Turn(testUser, TurnType.PROMPT, promptInput)))),
+                    new ArrayList<>(List.of(List.of(new Turn(testUser, TurnType.PROMPT, promptInput)))),
                     GameState.REQUEST_NEW_PROMPTS,
                     gameWithOutPrompt.get().createdAt()));
             when(gameRepo.findById(gameId)).thenReturn(gameWithOutPrompt);
@@ -192,7 +192,6 @@ class GameServiceTest {
             when(gameRepo.save(any(Game.class))).thenReturn(gameWithPrompt.get());
 
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
-
 
             // ACT
             RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
@@ -229,7 +228,7 @@ class GameServiceTest {
             Turn prompt = new Turn(user, TurnType.PROMPT, promptInput);
             Optional<Game> gameWithPrompt = Optional.of(new Game(gameId,
                     List.of(user),
-                    new HashMap<>(Map.of(0, List.of(prompt))),
+                    new ArrayList<>(List.of(List.of(prompt))),
                     GameState.WAIT_FOR_IMAGES,
                     time));
             when(gameRepo.findById(gameId)).thenReturn(gameWithPrompt);
@@ -240,14 +239,14 @@ class GameServiceTest {
 
             Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
             Game gameWithImageUrl = new Game(gameId, List.of(user),
-                    Map.of(0, List.of(prompt, generatedImage)), GameState.FINISHED, time);
+                    List.of(List.of(prompt, generatedImage)), GameState.FINISHED, time);
             when(gameRepo.save(any(Game.class))).thenReturn(gameWithImageUrl);
 
             // ACT
             RoundResponse roundResponseActual = serviceUnderTest.generateImage(mockedPrincipal, gameId);
 
             // ASSERT
-            assertEquals(gameWithImageUrl.asRoundResponse(), roundResponseActual);
+            assertEquals(gameWithImageUrl.asRoundResponse(testUser), roundResponseActual);
             verify(gameRepo, times(2)).findById(gameId);
             verify(gameRepo).save(gameWithImageUrl);
             verifyNoMoreInteractions(gameRepo);
@@ -264,7 +263,7 @@ class GameServiceTest {
         String gameId = "1";
         Optional<Game> gameWith3Images = Optional.of(new Game(gameId,
                 null,
-                Collections.emptyMap(),
+                Collections.emptyList(),
                 GameState.FINISHED,
                 Instant.now()));
         when(gameRepo.findById(gameId)).thenReturn(gameWith3Images);

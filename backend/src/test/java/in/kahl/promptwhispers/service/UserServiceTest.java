@@ -151,8 +151,8 @@ class UserServiceTest {
     void getAllGamesTest_whenGamesExists_thenReturnGames() {
         // ARRANGE
         User testUser = new User(userEmail);
-        Game testGame1 = new Game(testUser);
-        Game testGame2 = new Game(testUser);
+        Game testGame1 = new Game().withPlayer(testUser);
+        Game testGame2 = new Game().withPlayer(testUser);
         testUser = testUser.withGame(testGame1)
                 .withGame(testGame2);
 
@@ -180,8 +180,8 @@ class UserServiceTest {
     void removeGameTest_whenGameExists_thenRemoveGame() {
         // ARRANGE
         User userExpected = new User(userEmail);
-        Game testGame1 = new Game(userExpected);
-        Game testGameToDelete = new Game(userExpected);
+        Game testGame1 = new Game().withPlayer(userExpected);
+        Game testGameToDelete = new Game().withPlayer(userExpected);
         userExpected = userExpected.withGame(testGame1);
 
         User testUser = userExpected.withGame(testGameToDelete);

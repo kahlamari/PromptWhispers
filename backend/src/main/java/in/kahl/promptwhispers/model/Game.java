@@ -14,25 +14,16 @@ public record Game(
         String id,
         @DBRef
         List<User> players,
-        Map<Integer, List<Turn>> rounds,
+        List<List<Turn>> rounds,
         GameState gameState,
         Instant createdAt
 ) {
-    public Game(User host) {
+    public Game() {
         this(UUID.randomUUID().toString(),
-                new ArrayList<>(List.of(host)),
-                new HashMap<>(),
+                new ArrayList<>(),
+                new ArrayList<>(new ArrayList<>()),
                 GameState.NEW,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
-    }
-
-    public RoundResponse asRoundResponse() {
-        int playerIndex = 0;
-
-        return new RoundResponse(
-                id(),
-                rounds().get(playerIndex) == null ? Collections.emptyList() : rounds().get(playerIndex),
-                gameState());
     }
 
     public RoundResponse asRoundResponse(User player) {
@@ -43,13 +34,14 @@ public record Game(
 
         return new RoundResponse(
                 id(),
-                rounds().get(roundOfPlayer) == null ? Collections.emptyList() : rounds().get(roundOfPlayer),
+                rounds().isEmpty() ? Collections.emptyList() : rounds().get(roundOfPlayer),
                 gameState());
     }
 
     public Game withPlayer(User player) {
         if (players().stream().noneMatch(p -> p.id().equals(player.id()))) {
             players().add(player);
+            rounds().add(new ArrayList<>());
         }
 
         return new Game(id(), players(), rounds(), gameState(), createdAt());
@@ -66,7 +58,7 @@ public record Game(
             return 0;
         }
 
-        for (List<Turn> turns : rounds.values()) {
+        for (List<Turn> turns : rounds) {
             minTurnNumber = Math.min(minTurnNumber, (int) turns.stream().filter(turn -> turn.type().equals(TurnType.IMAGE)).count());
         }
 
@@ -78,7 +70,7 @@ public record Game(
     }
 
     private boolean haveAllRoundsSameNumberOfTurnsByType(TurnType turnType) {
-        Set<Long> counts = rounds().values().stream()
+        Set<Long> counts = rounds().stream()
                 .map(turns -> turns.stream().filter(turn -> turn.type().equals(turnType)).count())
                 .collect(Collectors.toSet());
 
@@ -127,12 +119,12 @@ public record Game(
         int offset = (playerIndex + getNumOfCompletedImageTurns()) % players().size();
 
         List<Turn> updatedTurns = new ArrayList<>();
-        if (rounds().get(offset) != null) {
+        if (!rounds().isEmpty()) {
             updatedTurns.addAll(rounds().get(offset));
         }
         updatedTurns.add(turn);
 
-        rounds().put(offset, updatedTurns);
+        rounds().set(offset, updatedTurns);
 
         return new Game(id(),
                 players(),
