@@ -1,5 +1,4 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { PromptCreate } from "../types/PromptCreate.ts";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Turn } from "../types/Turn.ts";
@@ -10,85 +9,43 @@ export default function Play() {
   const gameId: string | undefined = params.gameId;
 
   const [prompt, setPrompt] = useState<string>("");
-  const [round, setRound] = useState<Round>();
+  const [round, setRound] = useState<Round | undefined>(undefined);
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
-  const [waitingForImage, setWaitingForImage] = useState<boolean>(false);
-
-  const submitPrompt = async (
-    promptToSubmit: PromptCreate,
-  ): Promise<Round | undefined> => {
-    try {
-      const response = await axios.post<Round>(
-        `/api/games/${gameId}/prompt`,
-        promptToSubmit,
-      );
-      setRound(response.data);
-      return response.data;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  };
-
-  const requestImageGeneration = async (): Promise<Round | undefined> => {
-    try {
-      const response = await axios.post<Round>(
-        `/api/games/${gameId}/generateImage`,
-      );
-      return response.data;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  };
-
-  const getRound = (gameId: string) => {
-    axios.get<Round>(`/api/games/${gameId}`).then((response) => {
-      const freshRound = response.data;
-      setRound(freshRound);
-      console.log(
-        "GetRound: " + freshRound.gameState + inputDisabled + waitingForImage,
-      );
-      if (freshRound.gameState === "REQUEST_NEW_PROMPTS") {
-        console.log("REQUEST_NEW_PROMPTS");
-        setPrompt("");
-        setInputDisabled(false);
-        setWaitingForImage(false);
-      } else if (freshRound.gameState === "WAIT_FOR_IMAGES") {
-        console.log("WAIT_FOR_IMAGES");
-      } else if (freshRound.gameState === "WAIT_FOR_PROMPTS") {
-        console.log("WAIT_FOR_PROMPT");
-      }
-    });
-  };
+  const [shouldPoll, setShouldPoll] = useState<boolean>(true);
+  const [isGameRunning, setIsGameRunning] = useState<boolean>(true);
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const submitPrompt = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const promptToSubmit: PromptCreate = {
-      prompt,
-    };
-
     setInputDisabled(true);
-    setWaitingForImage(true);
-    submitPrompt(promptToSubmit).then((response) => {
-      requestImageGeneration();
-      if (response?.gameState === "REQUEST_NEW_PROMPTS") {
-        setPrompt("");
-        setInputDisabled(false);
-        setWaitingForImage(false);
-      }
-    });
+
+    axios
+      .post<Round>(`/api/games/${gameId}/prompt`, {
+        prompt,
+      })
+      .then((response) => {
+        setRound(response.data);
+        requestImageGeneration();
+      });
+  };
+
+  const requestImageGeneration = () => {
+    axios
+      .post<Round>(`/api/games/${gameId}/generateImage`)
+      .then((response) => setRound(response.data));
   };
 
   const getLastImage = (): Turn | undefined => {
     if (round) {
       // Due to the game's logic there needs to be a prompt before there can be an image
-      if (round.turns.length < 2) {
+      if (
+        round.gameState === "WAIT_FOR_IMAGES" ||
+        round.gameState === "WAIT_FOR_PROMPTS" ||
+        round.turns.length < 2
+      ) {
         return undefined;
       }
       const lastTurn: Turn = round.turns[round.turns.length - 1];
@@ -105,23 +62,51 @@ export default function Play() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("In UseEffect: " + round?.gameState);
-      if (
-        gameId &&
-        round?.gameState !== "REQUEST_NEW_PROMPTS" &&
-        round?.gameState !== "FINISHED"
-      ) {
-        getRound(gameId);
+      const getRound = () => {
+        axios
+          .get<Round>(`/api/games/${gameId}`)
+          .then((response) => setRound(response.data));
+      };
+
+      if (shouldPoll) {
+        getRound();
       }
     }, 5000);
+
+    if (!isGameRunning) {
+      clearInterval(interval);
+    }
 
     return () => {
       clearInterval(interval);
     };
-  }, [gameId, round]);
+  }, [gameId, shouldPoll, isGameRunning]);
+
+  // update the page based on the game's state
+  useEffect(() => {
+    if (round) {
+      if (
+        round.gameState === "REQUEST_NEW_PROMPTS" ||
+        round.gameState === "FINISHED"
+      ) {
+        setShouldPoll(false);
+        setPrompt("");
+        setInputDisabled(false);
+        if (round.gameState === "FINISHED") {
+          setIsGameRunning(false);
+        }
+      } else {
+        setShouldPoll(true);
+      }
+    }
+  }, [round]);
+
+  if (round == undefined) {
+    return <div>Loading</div>;
+  }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="mt-5 flex flex-col items-center">
       {getLastImage() && (
         <img
           className="h-128 w-auto rounded-2xl"
@@ -130,16 +115,13 @@ export default function Play() {
         />
       )}
       {!isGameFinished() && (
-        <>
-          <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
-            Enter your prompt!
-          </h1>
-          <form onSubmit={handleSubmit} className="flex">
+        <div className="mt-5">
+          <form onSubmit={submitPrompt} className="flex">
             <textarea
               value={prompt}
               onChange={onPromptChange}
               rows={2}
-              placeholder="The potato king leads an uprising"
+              placeholder="Enter your prompt!"
               autoFocus={true}
               disabled={inputDisabled}
               className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
@@ -152,7 +134,7 @@ export default function Play() {
               Done
             </button>
           </form>
-        </>
+        </div>
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
