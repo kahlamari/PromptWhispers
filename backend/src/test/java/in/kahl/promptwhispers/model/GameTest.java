@@ -3,7 +3,6 @@ package in.kahl.promptwhispers.model;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,11 +13,11 @@ class GameTest {
     void withTurnTest_whenProvidingTurn_thenReturnGameWithTurn() {
         // ARRANGE
         User user = new User("user@example.com");
-        Game newGame = new Game(user);
-        Turn turnPrompt = new Turn(TurnType.PROMPT, "A hedge jumps over a sheep");
+        Game newGame = new Game().withPlayer(user);
+        Turn turnPrompt = new Turn(user, TurnType.PROMPT, "A hedge jumps over a sheep");
         Game gameExpected = new Game(newGame.id(),
                 newGame.players(),
-                Map.of(0, List.of(turnPrompt)),
+                List.of(List.of(turnPrompt)),
                 GameState.REQUEST_NEW_PROMPTS,
                 newGame.createdAt());
 
@@ -34,7 +33,7 @@ class GameTest {
         // ARRANGE
         User alice = new User("alice@example.com");
         User bob = new User("bob@example.com");
-        Game gameWith1Image = new Game(alice)
+        Game gameWith1Image = new Game().withPlayer(alice)
                 .withPlayer(bob)
                 .withTurn(new Turn(alice, TurnType.PROMPT, "1st prompt"))
                 .withTurn(new Turn(bob, TurnType.PROMPT, "1st prompt"))
@@ -56,7 +55,7 @@ class GameTest {
         // ARRANGE
         User alice = new User("alice@example.com");
         User bob = new User("bob@example.com");
-        Game finishedGame = new Game(alice)
+        Game finishedGame = new Game().withPlayer(alice)
                 .withPlayer(bob)
                 .withTurn(new Turn(alice, TurnType.PROMPT, "1st prompt"))
                 .withTurn(new Turn(bob, TurnType.PROMPT, "1st prompt"))

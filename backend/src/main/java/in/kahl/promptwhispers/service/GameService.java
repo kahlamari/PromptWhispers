@@ -40,7 +40,7 @@ public class GameService {
             throw new IllegalStateException("Only the host can start a new game!");
         }
 
-        Game newGame = new Game(host);
+        Game newGame = new Game().withPlayer(host);
 
         for (User playerInLobby : lobby.players()) {
             User player = userService.getUserById(playerInLobby.id());
@@ -87,7 +87,7 @@ public class GameService {
         User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
-        Turn newPrompt = promptCreate.asNewPromptTurn().withPlayer(user);
+        Turn newPrompt = promptCreate.asNewPromptTurn(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
         return gameRepo.save(gameWithPrompt).asRoundResponse(user);

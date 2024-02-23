@@ -16,19 +16,11 @@ public record Turn(
         String content,
         Instant createdAt
 ) {
-    public Turn(TurnType type, String content) {
-        this(null, type, content);
-    }
-
     public Turn(User player, TurnType type, String content) {
         this(UUID.randomUUID().toString(),
                 player,
                 type,
                 content,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
-    }
-
-    public Turn withPlayer(User player) {
-        return new Turn(id(), player, type(), content(), createdAt());
     }
 }
