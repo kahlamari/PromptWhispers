@@ -1,8 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Turn } from "../types/Turn.ts";
 import { Round } from "../types/Round.ts";
+import Button from "../ui-components/Button.tsx";
 
 export default function Play() {
   const params = useParams();
@@ -13,6 +14,7 @@ export default function Play() {
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [shouldPoll, setShouldPoll] = useState<boolean>(true);
   const [isGameRunning, setIsGameRunning] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -126,13 +128,7 @@ export default function Play() {
               disabled={inputDisabled}
               className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
             />
-            <button
-              type="submit"
-              disabled={inputDisabled}
-              className="w-auto justify-center rounded-2xl bg-indigo-600 px-10 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-75"
-            >
-              Done
-            </button>
+            <Button caption="Done" type="submit" isDisabled={inputDisabled} />
           </form>
         </div>
       )}
@@ -141,12 +137,7 @@ export default function Play() {
           <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
             Game is completed!
           </h1>
-          <Link
-            to="/"
-            className="w-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Return to Start!
-          </Link>
+          <Button caption="Return to Start!" onClick={() => navigate("/")} />
         </div>
       )}
     </div>

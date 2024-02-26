@@ -5,6 +5,7 @@ import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
 import { Round } from "../types/Round.ts";
 import Spinner from "../ui-components/Spinner.tsx";
+import Button from "../ui-components/Button.tsx";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -73,36 +74,14 @@ export default function LobbyScreen(props: LobbyScreenProps) {
         lobby?.host?.id !== props.loggedInUser?.id &&
         !lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && (
-          <button
-            className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            type="button"
-            onClick={joinLobby}
-          >
-            Join!
-          </button>
-        )}
+        ) && <Button onClick={joinLobby} caption="Join!" />}
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
         lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && (
-          <button
-            className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            type="button"
-            onClick={leaveLobby}
-          >
-            Leave!
-          </button>
-        )}
+        ) && <Button onClick={leaveLobby} caption="Leave!!!" />}
       {lobby?.host?.id === props.loggedInUser?.id && (
-        <button
-          className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          type="button"
-          onClick={startGame}
-        >
-          Play!
-        </button>
+        <Button onClick={startGame} caption="Play!" />
       )}
     </div>
   );
