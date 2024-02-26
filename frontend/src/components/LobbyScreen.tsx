@@ -4,6 +4,7 @@ import axios from "axios";
 import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
 import { Round } from "../types/Round.ts";
+import Spinner from "../ui-components/Spinner.tsx";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -56,6 +57,10 @@ export default function LobbyScreen(props: LobbyScreenProps) {
       clearInterval(interval);
     };
   }, [lobbyId]);
+
+  if (!lobby) {
+    return <Spinner />;
+  }
 
   return (
     <div className="flex flex-col items-center">
