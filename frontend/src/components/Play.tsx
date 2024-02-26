@@ -1,4 +1,10 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useState,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Turn } from "../types/Turn.ts";
@@ -30,6 +36,14 @@ export default function Play() {
         setRound(response.data);
         requestImageGeneration();
       });
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      setInputDisabled(true);
+      submitPrompt(event as unknown as FormEvent<HTMLFormElement>);
+    }
   };
 
   const requestImageGeneration = () => {
@@ -120,11 +134,13 @@ export default function Play() {
             <textarea
               value={prompt}
               onChange={onPromptChange}
+              onKeyDown={handleKeyDown}
               rows={2}
               placeholder="Enter your prompt!"
               autoFocus={true}
               disabled={inputDisabled}
-              className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
+              maxLength={140}
+              className="mr-4 h-full w-auto resize-none overflow-hidden rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
             />
             <button
               type="submit"
