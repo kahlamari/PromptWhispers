@@ -28,18 +28,20 @@ function App() {
 
   return (
     <>
-      <Header user={user} logout={logout} />
-      <div className="flex h-svh justify-center gap-y-3 bg-indigo-50 p-3 text-lg xs:text-base sm:p-5">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/play/:gameId/" element={<Play />} />
-          <Route
-            path="/lobby/:lobbyId/"
-            element={<LobbyScreen loggedInUser={user} />}
-          />
-          <Route path="/games" element={<GameHistory />} />
-          <Route path="/games/:gameId/" element={<GameReplay />} />
-        </Routes>
+      <div className="bg-indigo-50">
+        <Header user={user} logout={logout} />
+        <div className="flex h-svh justify-center gap-y-3 bg-indigo-50 p-3 text-lg xs:text-base sm:p-5">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/play/:gameId/" element={<Play />} />
+            <Route
+              path="/lobby/:lobbyId/"
+              element={<LobbyScreen loggedInUser={user} />}
+            />
+            <Route path="/games" element={<GameHistory />} />
+            <Route path="/games/:gameId/" element={<GameReplay />} />
+          </Routes>
+        </div>
       </div>
     </>
   );

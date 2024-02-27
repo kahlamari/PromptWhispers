@@ -18,13 +18,13 @@ export default function Header(props: HeaderProps) {
   }
 
   return (
-    <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3 text-indigo-50">
+    <div className="top-0 flex h-16 w-full flex-row items-center justify-between rounded-b-3xl bg-indigo-600 px-3 text-indigo-50">
       <div className="flex h-full items-center font-extralight">
-        <Link className="mr-10 flex h-full items-center xs:mr-6" to="/">
-          <img className="mr-3 h-12 rounded-3xl" src={logoUrl} alt="logo" />
-          <h1 className="text-2xl xs:text-lg">Prompt Whispers</h1>
+        <Link className="mr-1 flex h-full items-center sm:mr-10" to="/">
+          <img className="mr-3 h-12 rounded-full" src={logoUrl} alt="logo" />
+          <h1 className="text-xl sm:text-4xl">Prompt Whispers</h1>
         </Link>
-        <div className="rounded-2xl p-2 hover:bg-indigo-500 xs:text-base">
+        <div className="rounded-2xl px-2 pt-1 text-base hover:bg-indigo-500 sm:pt-0 sm:text-lg">
           <Link to="/games">Games</Link>
         </div>
       </div>
