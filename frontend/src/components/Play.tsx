@@ -72,7 +72,6 @@ export default function Play() {
     }
     return undefined;
   };
-
   const isGameFinished = (): boolean => {
     return round?.gameState === "FINISHED";
   };
@@ -119,22 +118,38 @@ export default function Play() {
   }, [round]);
 
   if (!round) {
-    return <Spinner size={20} />;
+    return (
+      <div className="sm:h-144 flex h-96 items-center">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   return (
-    <div className="mt-5 flex flex-col items-center">
+    <div className="sm:w-144 mx-3 mt-5 flex h-full w-full flex-col items-center gap-y-5">
       {getLastImage() && (
         <img
-          className="h-128 w-auto rounded-2xl"
+          className="w-full rounded-2xl"
           alt="generated based on previous prompt"
           src={getLastImage()?.content}
         />
       )}
+      {!getLastImage() && round.turns.length >= 1 && (
+        <div className="flex h-96 items-center sm:h-128">
+          <Spinner size="xl" />
+        </div>
+      )}
+      {!getLastImage() && round.turns.length < 1 && (
+        <div className="h-96 sm:h-128"></div>
+      )}
       {!isGameFinished() && (
-        <div className="mt-5">
-          <form onSubmit={submitPrompt} className="flex">
+        <div className="w-full items-center">
+          <form
+            onSubmit={submitPrompt}
+            className="flex w-full flex-col gap-y-3 sm:flex-row sm:gap-x-5"
+          >
             <textarea
+              className="h-full w-full resize-none overflow-hidden rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
               value={prompt}
               onChange={onPromptChange}
               onKeyDown={handleKeyDown}
@@ -143,7 +158,6 @@ export default function Play() {
               autoFocus={true}
               disabled={inputDisabled}
               maxLength={140}
-              className="mr-4 h-full w-auto resize-none overflow-hidden rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
             />
             <Button caption="Done" type="submit" isDisabled={inputDisabled} />
           </form>

@@ -56,7 +56,7 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   }, [lobby, navigate]);
 
   if (!lobby) {
-    return <Spinner size={20} />;
+    return <Spinner size="xl" />;
   }
 
   return (
@@ -66,7 +66,7 @@ export default function LobbyScreen(props: LobbyScreenProps) {
           <li key={player?.id}>{player?.email}</li>
         ))}
         <li className="flex items-center gap-2">
-          <Spinner size={4} />
+          <Spinner size="sm" />
           waiting for players
         </li>
       </ul>
