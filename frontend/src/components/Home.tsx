@@ -27,12 +27,12 @@ export default function Home() {
   };
 
   return (
-      <div className="flex flex-col items-center">
-        <img
-            className="w-auto rounded-2xl p-2"
-            alt="image to get players excited"
-            src={pickRandomImage()}
-        />
+    <div className="flex flex-col items-center">
+      <img
+        className="w-auto rounded-2xl p-2"
+        alt="get players excited"
+        src={pickRandomImage()}
+      />
       <Button onClick={startGame} caption="Play" />
       <Button onClick={startLobby} caption="Start Lobby" />
     </div>
