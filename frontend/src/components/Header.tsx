@@ -18,7 +18,7 @@ export default function Header(props: HeaderProps) {
   }
 
   return (
-    <div className="top-0 flex h-16 w-full flex-row items-center justify-between rounded-b-3xl bg-indigo-600 px-3 text-indigo-50">
+    <div className="top-0 flex h-16 w-full flex-row items-center justify-between rounded-b-2xl bg-indigo-600 px-3 text-indigo-50">
       <div className="flex h-full items-center font-extralight">
         <Link className="mr-1 flex h-full items-center sm:mr-10" to="/">
           <img className="mr-3 h-12 rounded-full" src={logoUrl} alt="logo" />
