@@ -10,6 +10,7 @@ import axios from "axios";
 import { Turn } from "../types/Turn.ts";
 import { Round } from "../types/Round.ts";
 import Button from "../ui-components/Button.tsx";
+import Spinner from "../ui-components/Spinner.tsx";
 
 export default function Play() {
   const params = useParams();
@@ -117,8 +118,8 @@ export default function Play() {
     }
   }, [round]);
 
-  if (round == undefined) {
-    return <div>Loading</div>;
+  if (!round) {
+    return <Spinner size={20} />;
   }
 
   return (
@@ -150,7 +151,10 @@ export default function Play() {
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
-          <Button caption="View all turns!" onClick={() => navigate(`/games/${gameId}`)} />
+          <Button
+            caption="View all turns!"
+            onClick={() => navigate(`/games/${gameId}`)}
+          />
         </div>
       )}
     </div>
