@@ -60,7 +60,7 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-y-3 sm:gap-y-5">
       <ul className="mb-5 divide-y divide-indigo-200 text-lg font-light">
         {lobby?.players.map((player) => (
           <li key={player?.id}>{player?.email}</li>

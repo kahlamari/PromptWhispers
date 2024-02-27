@@ -127,7 +127,7 @@ export default function Play() {
   }
 
   return (
-    <div className="sm:w-144 m-3 flex h-full w-full flex-col items-center gap-y-3 sm:m-5 sm:gap-y-5">
+    <div className="sm:w-144 flex h-full w-full flex-col items-center gap-y-3 sm:gap-y-5">
       {getLastImage() && (
         <img
           className="w-svw rounded-2xl"
