@@ -56,17 +56,19 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   }, [lobby, navigate]);
 
   if (!lobby) {
-    return <Spinner />;
+    return <Spinner size={20} />;
   }
 
   return (
     <div className="flex flex-col items-center">
-      <ul className="mb-5 divide-y divide-indigo-200">
+      <ul className="mb-5 divide-y divide-indigo-200 text-lg font-light">
         {lobby?.players.map((player) => (
-          <li key={player?.id} className="text-lg font-light leading-6">
-            {player?.email}
-          </li>
+          <li key={player?.id}>{player?.email}</li>
         ))}
+        <li className="flex items-center gap-2">
+          <Spinner size={4} />
+          waiting for players
+        </li>
       </ul>
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
