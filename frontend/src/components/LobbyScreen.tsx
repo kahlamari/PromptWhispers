@@ -17,28 +17,18 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   const [lobby, setLobby] = useState<Lobby | undefined | null>(undefined);
   const navigate = useNavigate();
 
-  const getLobby = (lobbyId: string) => {
-    axios.get<Lobby>(`/api/lobbies/${lobbyId}`).then((response) => {
-      const lobbyData: Lobby = response.data;
-      setLobby(lobbyData);
-      if (lobbyData.isGameStarted) {
-        navigate(`/play/${lobbyData.gameId}`);
-      }
-    });
-  };
-
   const joinLobby = () => {
     if (!lobbyId) return null;
     axios
       .put<Lobby>(`/api/lobbies/${lobbyId}/join`)
-      .then(() => getLobby(lobbyId));
+      .then((response) => setLobby(response.data));
   };
 
   const leaveLobby = () => {
     if (!lobbyId) return null;
     axios
       .put<Lobby>(`/api/lobbies/${lobbyId}/leave`)
-      .then(() => getLobby(lobbyId));
+      .then((response) => setLobby(response.data));
   };
 
   const startGame = () => {
@@ -49,15 +39,21 @@ export default function LobbyScreen(props: LobbyScreenProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (lobbyId) {
-        getLobby(lobbyId);
-      }
+      axios
+        .get<Lobby>(`/api/lobbies/${lobbyId}`)
+        .then((response) => setLobby(response.data));
     }, 5000);
 
     return () => {
       clearInterval(interval);
     };
   }, [lobbyId]);
+
+  useEffect(() => {
+    if (lobby?.isGameStarted) {
+      navigate(`/play/${lobby.gameId}`);
+    }
+  }, [lobby, navigate]);
 
   if (!lobby) {
     return <Spinner />;
