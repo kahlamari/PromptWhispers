@@ -6,7 +6,7 @@ import { User } from "./types/User.ts";
 import axios from "axios";
 import Header from "./components/Header.tsx";
 import GameHistory from "./components/GameHistory.tsx";
-import GameReply from "./components/GameReply.tsx";
+import GameReplay from "./components/GameReplay.tsx";
 import LobbyScreen from "./components/LobbyScreen.tsx";
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
             element={<LobbyScreen loggedInUser={user} />}
           />
           <Route path="/games" element={<GameHistory />} />
-          <Route path="/games/:gameId/" element={<GameReply />} />
+          <Route path="/games/:gameId/" element={<GameReplay />} />
         </Routes>
       </div>
     </>

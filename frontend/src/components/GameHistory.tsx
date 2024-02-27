@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Turn } from "../types/Turn.ts";
 
 export default function GameHistory() {
   const navigate = useNavigate();
@@ -18,6 +19,14 @@ export default function GameHistory() {
     axios.delete(`/api/games/${gameId}`).then(() => getGames());
   }
 
+  const getTurns = (rounds: Turn[][]): number => {
+    if (rounds[0]) {
+      return rounds[0].length;
+    }
+
+    return 0;
+  };
+
   useEffect(() => {
     getGames();
   }, []);
@@ -30,7 +39,7 @@ export default function GameHistory() {
               Game
             </th>
             <th scope="col" className="px-6 py-3">
-              Steps
+              Turns
             </th>
             <th scope="col" className="px-6 py-3">
               Finished
@@ -44,18 +53,18 @@ export default function GameHistory() {
           {games.map((game) => (
             <tr
               key={game.id}
-              onClick={() => navigate(`${game.id}`)}
               className="cursor-pointer border-b bg-white dark:border-gray-700 dark:bg-gray-800"
             >
               <th
                 scope="row"
+                onClick={() => navigate(`${game.id}`)}
                 className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
               >
                 {game.id}
               </th>
-              <td className="px-6 py-4">{game.rounds[0].length}</td>
+              <td className="px-6 py-4">{getTurns(game.rounds)}</td>
               <td className="px-6 py-4">
-                {game.gameState === "FINISHED" ? "Completed" : "Not finished"}
+                {game.gameState === "FINISHED" ? "Yes" : "Not finished"}
               </td>
               <td className="px-6 py-4">
                 <button onClick={() => deleteGame(game.id)}>Delete</button>
