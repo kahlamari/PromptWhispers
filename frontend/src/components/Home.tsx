@@ -27,14 +27,16 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="sm:w-144 m-3 flex h-full w-full flex-col items-center gap-y-3 sm:m-5 sm:gap-y-5">
       <img
-        className="w-auto rounded-2xl p-2"
+        className="w-svw rounded-2xl"
         alt="get players excited"
         src={pickRandomImage()}
       />
-      <Button onClick={startGame}>Play Solo</Button>
-      <Button onClick={startLobby}>Play Multiplayer</Button>
+      <div className="flex w-full flex-col gap-y-3 sm:flex-row sm:justify-between sm:gap-x-5">
+        <Button onClick={startGame}>Play Solo</Button>
+        <Button onClick={startLobby}>Play Multiplayer</Button>
+      </div>
     </div>
   );
 }
