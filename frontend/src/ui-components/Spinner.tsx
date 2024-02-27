@@ -1,15 +1,14 @@
 type SpinnerProps = {
-  size?: number;
+  size: 4 | 20;
 };
 export default function Spinner(props: Readonly<SpinnerProps>) {
-  const size: number = props.size ?? 8;
   return (
     <div>
       <svg
         aria-hidden="true"
-        className={`inline h-${size} w-${size} animate-spin fill-indigo-600 text-indigo-200 dark:text-gray-600`}
+        className={`inline ${"h-" + props.size} ${"w-" + props.size} animate-spin fill-indigo-600 text-indigo-200 dark:text-gray-600`}
         viewBox="0 0 100 101"
-        fill="none"
+        fill="fill"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
