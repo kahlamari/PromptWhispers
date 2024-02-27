@@ -29,7 +29,7 @@ function App() {
   return (
     <>
       <Header user={user} logout={logout} />
-      <div className="flex h-full min-h-screen justify-center gap-y-3 bg-indigo-50 text-lg xs:text-base">
+      <div className="flex h-svh justify-center gap-y-3 bg-indigo-50 text-lg xs:text-base">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId/" element={<Play />} />

@@ -11,6 +11,7 @@ import { Turn } from "../types/Turn.ts";
 import { Round } from "../types/Round.ts";
 import Button from "../ui-components/Button.tsx";
 import Spinner from "../ui-components/Spinner.tsx";
+import ImagePlaceholder from "../ui-components/ImagePlaceholder.tsx";
 
 export default function Play() {
   const params = useParams();
@@ -135,12 +136,12 @@ export default function Play() {
         />
       )}
       {!getLastImage() && round.turns.length >= 1 && (
-        <div className="flex h-96 items-center sm:h-128">
-          <Spinner size="xl" />
+        <div className="sm:w-144 aspect-square w-full items-center">
+          <ImagePlaceholder />
         </div>
       )}
       {!getLastImage() && round.turns.length < 1 && (
-        <div className="h-96 sm:h-128"></div>
+        <div className="sm:h-144 aspect-square h-96"></div>
       )}
       {!isGameFinished() && (
         <div className="w-full items-center">
