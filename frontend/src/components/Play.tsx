@@ -127,10 +127,10 @@ export default function Play() {
   }
 
   return (
-    <div className="sm:w-144 mx-3 mt-5 flex h-full w-full flex-col items-center gap-y-5">
+    <div className="sm:w-144 m-3 flex h-full w-full flex-col items-center gap-y-3 sm:m-5 sm:gap-y-5">
       {getLastImage() && (
         <img
-          className="w-full rounded-2xl"
+          className="w-svw rounded-2xl"
           alt="generated based on previous prompt"
           src={getLastImage()?.content}
         />
@@ -161,7 +161,11 @@ export default function Play() {
               maxLength={140}
             />
             <Button type="submit" isDisabled={inputDisabled}>
-              Done
+              {!getLastImage() && round.turns.length >= 1 ? (
+                <Spinner size="md" />
+              ) : (
+                "Done"
+              )}
             </Button>
           </form>
         </div>
