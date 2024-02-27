@@ -56,12 +56,16 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   }, [lobby, navigate]);
 
   if (!lobby) {
-    return <Spinner size="xl" />;
+    return (
+      <div className="sm:h-144 flex h-96 items-center">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col items-center gap-y-3 sm:gap-y-5">
-      <ul className="mb-5 divide-y divide-indigo-200 text-lg font-light">
+      <ul className="sm:min-h-144 flex min-h-96 flex-col items-center justify-center divide-y divide-indigo-200 text-lg font-light">
         {lobby?.players.map((player) => (
           <li key={player?.id}>{player?.email}</li>
         ))}
