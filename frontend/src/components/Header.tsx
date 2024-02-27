@@ -1,5 +1,6 @@
 import { User } from "../types/User.ts";
 import { Link } from "react-router-dom";
+import logoUrl from "./../assets/promptwhispers-logo.webp";
 
 type HeaderProps = {
   user: User;
@@ -18,15 +19,20 @@ export default function Header(props: HeaderProps) {
 
   return (
     <div className="top-0 flex h-16 w-full flex-row items-center justify-between bg-indigo-600 px-3 text-indigo-50">
-      <div className="text-2xl font-extralight">
-        <Link to="/">Prompt Whispers</Link>
+      <div className="flex h-full items-center font-extralight">
+        <Link className="mr-10 flex h-full items-center xs:mr-6" to="/">
+          <img className="mr-3 h-12 rounded-3xl" src={logoUrl} alt="logo" />
+          <h1 className="text-2xl xs:text-lg">Prompt Whispers</h1>
+        </Link>
+        <div className="rounded-2xl p-2 hover:bg-indigo-500 xs:text-base">
+          <Link to="/games">Games</Link>
+        </div>
       </div>
-      <Link to="/games">Games</Link>
 
       {!props.user && (
         <button
           onClick={login}
-          className="w-auto justify-center rounded-2xl bg-indigo-50 px-2 py-2 font-light text-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="w-auto justify-center rounded-2xl bg-indigo-50 px-2 py-2 font-light text-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 xs:text-base"
         >
           Login
         </button>
