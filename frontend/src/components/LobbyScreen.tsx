@@ -65,9 +65,11 @@ export default function LobbyScreen(props: LobbyScreenProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <ul>
+      <ul className="mb-5 divide-y divide-indigo-200">
         {lobby?.players.map((player) => (
-          <li key={player?.id}>{player?.email}</li>
+          <li key={player?.id} className="text-lg font-light leading-6">
+            {player?.email}
+          </li>
         ))}
       </ul>
       {props.loggedInUser &&
