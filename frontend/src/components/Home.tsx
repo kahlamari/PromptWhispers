@@ -18,8 +18,21 @@ export default function Home() {
     });
   };
 
+  const pickRandomImage = (): string => {
+    const images: string[] = ["fries", "jedibroccoli", "potatoking"];
+
+    const image = images[Math.floor(Math.random() * images.length)];
+
+    return "/starter-images/" + image + ".webp";
+  };
+
   return (
-    <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center">
+        <img
+            className="w-auto rounded-2xl p-2"
+            alt="image to get players excited"
+            src={pickRandomImage()}
+        />
       <Button onClick={startGame} caption="Play" />
       <Button onClick={startLobby} caption="Start Lobby" />
     </div>
