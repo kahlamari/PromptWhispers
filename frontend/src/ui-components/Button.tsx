@@ -1,5 +1,7 @@
+import { ReactNode } from "react";
+
 type ButtonProps = {
-  caption: string;
+  children: ReactNode;
   onClick?: () => void;
   isDisabled?: boolean;
   type?: "submit" | "reset" | "button";
@@ -13,7 +15,7 @@ export default function Button(props: Readonly<ButtonProps>) {
       onClick={props.onClick}
       type={props.type ?? "button"}
     >
-      {props.caption}
+      {props.children}
     </button>
   );
 }

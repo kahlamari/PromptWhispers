@@ -33,8 +33,8 @@ export default function Home() {
         alt="get players excited"
         src={pickRandomImage()}
       />
-      <Button onClick={startGame} caption="Play" />
-      <Button onClick={startLobby} caption="Start Lobby" />
+      <Button onClick={startGame}>Play Solo</Button>
+      <Button onClick={startLobby}>Play Multiplayer</Button>
     </div>
   );
 }

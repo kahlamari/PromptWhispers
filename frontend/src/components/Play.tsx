@@ -160,16 +160,17 @@ export default function Play() {
               disabled={inputDisabled}
               maxLength={140}
             />
-            <Button caption="Done" type="submit" isDisabled={inputDisabled} />
+            <Button type="submit" isDisabled={inputDisabled}>
+              Done
+            </Button>
           </form>
         </div>
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
-          <Button
-            caption="View all turns!"
-            onClick={() => navigate(`/games/${gameId}`)}
-          />
+          <Button onClick={() => navigate(`/games/${gameId}`)}>
+            View all turns!
+          </Button>
         </div>
       )}
     </div>

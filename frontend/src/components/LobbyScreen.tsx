@@ -74,14 +74,14 @@ export default function LobbyScreen(props: LobbyScreenProps) {
         lobby?.host?.id !== props.loggedInUser?.id &&
         !lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && <Button onClick={joinLobby} caption="Join!" />}
+        ) && <Button onClick={joinLobby}>Join!</Button>}
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
         lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && <Button onClick={leaveLobby} caption="Leave!" />}
+        ) && <Button onClick={leaveLobby}>Leave!</Button>}
       {lobby?.host?.id === props.loggedInUser?.id && (
-        <Button onClick={startGame} caption="Play!" />
+        <Button onClick={startGame}>Play!</Button>
       )}
     </div>
   );
