@@ -138,14 +138,11 @@ export default function Play() {
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
-          <h1 className="m-5 text-center text-6xl font-bold text-gray-900">
-            Game is completed!
-          </h1>
           <Link
-            to="/"
+            to={`/games/${gameId}`}
             className="w-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Return to Start!
+            View all turns!
           </Link>
         </div>
       )}
