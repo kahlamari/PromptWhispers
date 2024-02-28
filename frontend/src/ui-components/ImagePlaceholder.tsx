@@ -1,7 +1,6 @@
 export default function ImagePlaceholder() {
   return (
     <div
-      role="status"
       className="sm:h-144 h-96 animate-pulse space-y-8 md:flex md:items-center md:space-x-8 md:space-y-0 rtl:space-x-reverse"
     >
       <div className="flex aspect-square min-h-full w-full items-center justify-center rounded-2xl bg-indigo-300">
