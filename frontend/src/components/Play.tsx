@@ -22,6 +22,7 @@ export default function Play() {
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [shouldPoll, setShouldPoll] = useState<boolean>(true);
   const [isGameRunning, setIsGameRunning] = useState<boolean>(true);
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,6 +114,7 @@ export default function Play() {
           setIsGameRunning(false);
         }
       } else {
+        setIsImageLoaded(false);
         setShouldPoll(true);
       }
     }
@@ -130,17 +132,18 @@ export default function Play() {
     <div className="sm:w-144 flex h-full w-full flex-col items-center gap-y-3 sm:gap-y-5">
       {getLastImage() && (
         <img
-          className="w-svw rounded-2xl"
+          className={`w-svw rounded-2xl  ${isImageLoaded ? "block" : "hidden"}`}
           alt="generated based on previous prompt"
           src={getLastImage()?.content}
+          onLoad={() => setIsImageLoaded(true)}
         />
       )}
-      {!getLastImage() && round.turns.length >= 1 && (
+      {!isImageLoaded && round.turns.length >= 1 && (
         <div className="sm:w-144 aspect-square w-full items-center">
           <ImagePlaceholder />
         </div>
       )}
-      {!getLastImage() && round.turns.length < 1 && (
+      {!isImageLoaded && round.turns.length < 1 && (
         <div className="sm:h-144 aspect-square h-96"></div>
       )}
       {!isGameFinished() && (
