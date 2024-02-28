@@ -45,25 +45,64 @@ export default function GameReplay() {
           {game.rounds.map((turns: Turn[], index: number) => (
             <div
               key={index}
-              className={`${activeRoundTab === index ? "block" : "hidden"} flex flex-col gap-y-5 p-4`}
+              className={`${activeRoundTab === index ? "block" : "hidden"} flex flex-col gap-y-5`}
             >
               {turns.map((turn: Turn) => (
                 <div key={turn.id}>
                   {turn.type === "PROMPT" ? (
-                    <textarea
-                      value={turn.content}
-                      rows={2}
-                      placeholder="The potato king leads an uprising"
-                      autoFocus={true}
-                      disabled={true}
-                      className="h-full w-full resize-none rounded-2xl bg-gray-50 p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
-                    />
+                    <div className="flex items-start gap-2.5">
+                      <img
+                        className="h-12 w-12 rounded-full"
+                        src={
+                          game.players
+                            .filter((user) => user?.id === turn.player?.id)
+                            .pop()?.profilePicUrl
+                        }
+                        alt="Profile Pic"
+                      />
+                      <div className="flex flex-col gap-1">
+                        <div className="leading-1.5 flex w-full flex-col rounded-e-2xl rounded-es-2xl border-gray-200 bg-gray-50 p-4">
+                          <div className="mb-2 flex items-center space-x-2">
+                            <span className="text-sm font-semibold text-gray-900">
+                              {
+                                game.players
+                                  .filter(
+                                    (user) => user?.id === turn.player?.id,
+                                  )
+                                  .pop()?.email
+                              }
+                            </span>
+                          </div>
+                          <p className="text-3xl font-normal text-gray-900">
+                            {turn.content}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <img
-                      className="w-svw rounded-2xl"
-                      alt="generated based on previous prompt"
-                      src={turn.content}
-                    />
+                    <div className="flex items-start gap-2.5">
+                      <img
+                        className="h-12 w-12 rounded-full"
+                        src="/openai-logo.png"
+                        alt="Profile Pic"
+                      />
+                      <div className="flex flex-col gap-1">
+                        <div className="leading-1.5 flex w-full flex-col rounded-e-2xl rounded-es-2xl border-gray-200 bg-gray-50 p-4">
+                          <div className="mb-2 flex items-center space-x-2">
+                            <span className="text-sm font-semibold text-gray-900">
+                              Dall-E
+                            </span>
+                          </div>
+                          <div className="my-1.5">
+                            <img
+                              src={turn.content}
+                              className="rounded-2xl"
+                              alt="generated"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
