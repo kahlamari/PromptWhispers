@@ -45,7 +45,7 @@ export default function GameReplay() {
           {game.rounds.map((turns: Turn[], index: number) => (
             <div
               key={index}
-              className={`${activeRoundTab === index ? "block" : "hidden"} rounded-lg bg-gray-50 p-4 dark:bg-gray-800`}
+              className={`${activeRoundTab === index ? "block" : "hidden"} flex flex-col gap-y-5 p-4`}
             >
               {turns.map((turn: Turn) => (
                 <div key={turn.id}>
@@ -56,11 +56,11 @@ export default function GameReplay() {
                       placeholder="The potato king leads an uprising"
                       autoFocus={true}
                       disabled={true}
-                      className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
+                      className="h-full w-full resize-none rounded-2xl bg-gray-50 p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
                     />
                   ) : (
                     <img
-                      className="h-128 w-auto rounded-2xl"
+                      className="w-svw rounded-2xl"
                       alt="generated based on previous prompt"
                       src={turn.content}
                     />
