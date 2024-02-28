@@ -60,10 +60,16 @@ public class UserService {
             return false;
         }
 
+        String profilePic = oAuth2User.getAttribute("picture");
+
+        if (profilePic == null) {
+            profilePic = "";
+        }
+
         boolean isReturningUser = userRepo.existsByEmail(userEmail.trim());
 
         if (!isReturningUser) {
-            User newUser = new User(userEmail.trim());
+            User newUser = new User(userEmail.trim(), profilePic);
             userRepo.save(newUser);
         }
 
