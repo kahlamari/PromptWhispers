@@ -46,8 +46,8 @@ export default function GameReplay() {
 
   if (game?.rounds) {
     return (
-      <div>
-        <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="w-full sm:w-144">
+        <div className="mb-4 w-full border-b border-gray-200">
           <ul className="-mb-px flex flex-wrap text-center text-sm font-medium">
             {game?.players.map((player: User, index: number) => (
               <li key={player?.id} className="me-2">
@@ -114,7 +114,7 @@ export default function GameReplay() {
                               Dall-E
                             </span>
                           </div>
-                          <div className="my-1.5">
+                          <div className="">
                             <img
                               src={turn.content}
                               className="rounded-2xl"
