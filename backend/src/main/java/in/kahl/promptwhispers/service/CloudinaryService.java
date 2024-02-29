@@ -24,7 +24,10 @@ public class CloudinaryService {
                     "folder", "promptwhispers_test"
             ));
 
-            return cloudinaryResponse.get("secure_url").toString();
+            return cloudinaryResponse.get("secure_url")
+                    .toString()
+                    .replaceFirst("magikahl/image/upload/", "magikahl/image/upload/t_formatToWebP/");
+
         } catch (IOException exception) {
             return url;
         }
