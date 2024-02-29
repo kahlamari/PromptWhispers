@@ -25,7 +25,7 @@ export default function Header(props: HeaderProps) {
           <h1 className="text-xl sm:text-4xl">Prompt Whispers</h1>
         </Link>
         <div className="rounded-2xl px-2 pt-1 text-base hover:bg-indigo-500 sm:pt-0 sm:text-lg">
-          {!props.user && <Link to="/games">Games</Link>}
+          {!!props.user && <Link to="/games">Games</Link>}
         </div>
       </div>
 
