@@ -10,9 +10,13 @@ export default function GameReplay() {
   const gameId: string | undefined = params.gameId;
   const [game, setGame] = useState<Game | undefined | null>(undefined);
   const [activeRoundTab, setActiveRoundTab] = useState<number>(0);
+  const [visibleCount, setVisibleCount] = useState<number>(1);
 
   const handleTabClick = (tabId: number) => {
     setActiveRoundTab(tabId);
+    if (activeRoundTab !== tabId) {
+      setVisibleCount(1);
+    }
   };
 
   useEffect(() => {
@@ -23,13 +27,30 @@ export default function GameReplay() {
     }
   }, [gameId]);
 
+  useEffect(() => {
+    if (game) {
+      const timer = setInterval(() => {
+        setVisibleCount((prevCount) => {
+          if (prevCount < game?.rounds[0].length) {
+            return prevCount + 1;
+          } else {
+            clearInterval(timer);
+            return prevCount;
+          }
+        });
+      }, 2000);
+
+      return () => clearInterval(timer);
+    }
+  }, [game, activeRoundTab]);
+
   if (game?.rounds) {
     return (
       <div>
         <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
           <ul className="-mb-px flex flex-wrap text-center text-sm font-medium">
             {game?.players.map((player: User, index: number) => (
-              <li key={index} className="me-2">
+              <li key={player?.id} className="me-2">
                 <button
                   className={`inline-block rounded-t-lg border-b-2 p-4 ${activeRoundTab === index ? "border-indigo-500 text-indigo-600" : "hover:border-gray-300 hover:text-gray-600 dark:hover:text-gray-300"}`}
                   onClick={() => handleTabClick(index)}
@@ -44,10 +65,10 @@ export default function GameReplay() {
         <div>
           {game.rounds.map((turns: Turn[], index: number) => (
             <div
-              key={index}
+              key={turns[index].id}
               className={`${activeRoundTab === index ? "block" : "hidden"} flex flex-col gap-y-5`}
             >
-              {turns.map((turn: Turn) => (
+              {turns.slice(0, visibleCount).map((turn: Turn) => (
                 <div key={turn.id}>
                   {turn.type === "PROMPT" ? (
                     <div className="flex items-start gap-2.5">
