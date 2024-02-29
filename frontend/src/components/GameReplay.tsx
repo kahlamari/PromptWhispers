@@ -54,7 +54,7 @@ export default function GameReplay() {
 
   if (game?.rounds) {
     return (
-      <div className="mx-4 w-svw sm:mx-0 sm:w-144">
+      <div className="mx-0 w-svw sm:w-144">
         <div className="mb-4 w-full border-b border-gray-200">
           <ul className="-mb-px flex flex-wrap text-center text-sm font-medium">
             {game?.players.map((player: User, index: number) => (
