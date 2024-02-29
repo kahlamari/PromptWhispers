@@ -14,16 +14,21 @@ public record User(
         @Id
         String id,
         String email,
+        String profilePicUrl,
         List<String> gameIds,
         AuthProvider authProvider,
         Instant createdAt
 ) {
     public User(String email) {
-        this(UUID.randomUUID().toString(), email, new ArrayList<>(Collections.emptyList()), AuthProvider.GOOGLE, Instant.now().truncatedTo(ChronoUnit.MILLIS));
+        this(email, "");
+    }
+
+    public User(String email, String profilePicUrl) {
+        this(UUID.randomUUID().toString(), email, profilePicUrl, new ArrayList<>(Collections.emptyList()), AuthProvider.GOOGLE, Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     public User withGameIds(List<String> gamesList) {
-        return new User(id(), email(), gamesList, authProvider(), createdAt());
+        return new User(id(), email(), profilePicUrl(), gamesList, authProvider(), createdAt());
     }
 
     public User withGame(Game game) {

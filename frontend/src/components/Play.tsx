@@ -122,14 +122,14 @@ export default function Play() {
 
   if (!round) {
     return (
-      <div className="sm:h-144 flex h-96 items-center">
+      <div className="flex h-96 items-center sm:h-144">
         <Spinner size="xl" />
       </div>
     );
   }
 
   return (
-    <div className="sm:w-144 flex h-full w-full flex-col items-center gap-y-3 sm:gap-y-5">
+    <div className="flex h-full w-full flex-col items-center gap-y-3 sm:w-144 sm:gap-y-5">
       {getLastImage() && (
         <img
           className={`w-svw rounded-2xl  ${isImageLoaded ? "block" : "hidden"}`}
@@ -139,12 +139,12 @@ export default function Play() {
         />
       )}
       {!isImageLoaded && round.turns.length >= 1 && (
-        <div className="sm:w-144 aspect-square w-full items-center">
+        <div className="aspect-square w-full items-center sm:w-144">
           <ImagePlaceholder />
         </div>
       )}
       {!isImageLoaded && round.turns.length < 1 && (
-        <div className="sm:h-144 aspect-square h-96"></div>
+        <div className="aspect-square h-96 sm:h-144"></div>
       )}
       {!isGameFinished() && (
         <div className="w-full items-center">

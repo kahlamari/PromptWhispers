@@ -4,10 +4,11 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Turn } from "../types/Turn.ts";
+import Spinner from "../ui-components/Spinner.tsx";
 
 export default function GameHistory() {
   const navigate = useNavigate();
-  const [games, setGames] = useState<Game[]>([]);
+  const [games, setGames] = useState<Game[] | undefined>(undefined);
 
   function getGames() {
     axios.get<Game[]>("/api/games").then((response) => {
@@ -30,6 +31,14 @@ export default function GameHistory() {
   useEffect(() => {
     getGames();
   }, []);
+
+  if (!games) {
+    return (
+      <div className="sm:h-144 flex h-96 items-center">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
