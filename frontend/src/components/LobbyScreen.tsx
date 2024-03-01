@@ -4,6 +4,8 @@ import axios from "axios";
 import { Lobby } from "../types/Lobby.ts";
 import { User } from "../types/User.ts";
 import { Round } from "../types/Round.ts";
+import Spinner from "../ui-components/Spinner.tsx";
+import Button from "../ui-components/Button.tsx";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -15,28 +17,18 @@ export default function LobbyScreen(props: LobbyScreenProps) {
   const [lobby, setLobby] = useState<Lobby | undefined | null>(undefined);
   const navigate = useNavigate();
 
-  const getLobby = (lobbyId: string) => {
-    axios.get<Lobby>(`/api/lobbies/${lobbyId}`).then((response) => {
-      const lobbyData: Lobby = response.data;
-      setLobby(lobbyData);
-      if (lobbyData.isGameStarted) {
-        navigate(`/play/${lobbyData.gameId}`);
-      }
-    });
-  };
-
   const joinLobby = () => {
     if (!lobbyId) return null;
     axios
       .put<Lobby>(`/api/lobbies/${lobbyId}/join`)
-      .then(() => getLobby(lobbyId));
+      .then((response) => setLobby(response.data));
   };
 
   const leaveLobby = () => {
     if (!lobbyId) return null;
     axios
       .put<Lobby>(`/api/lobbies/${lobbyId}/leave`)
-      .then(() => getLobby(lobbyId));
+      .then((response) => setLobby(response.data));
   };
 
   const startGame = () => {
@@ -47,9 +39,9 @@ export default function LobbyScreen(props: LobbyScreenProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (lobbyId) {
-        getLobby(lobbyId);
-      }
+      axios
+        .get<Lobby>(`/api/lobbies/${lobbyId}`)
+        .then((response) => setLobby(response.data));
     }, 5000);
 
     return () => {
@@ -57,47 +49,43 @@ export default function LobbyScreen(props: LobbyScreenProps) {
     };
   }, [lobbyId]);
 
+  useEffect(() => {
+    if (lobby?.isGameStarted) {
+      navigate(`/play/${lobby.gameId}`);
+    }
+  }, [lobby, navigate]);
+
+  if (!lobby) {
+    return (
+      <div className="sm:h-144 flex h-96 items-center">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center">
-      <ul>
+    <div className="flex flex-col items-center gap-y-3 sm:gap-y-5">
+      <ul className="sm:min-h-144 flex min-h-96 flex-col items-center justify-center divide-y divide-indigo-200 text-lg font-light">
         {lobby?.players.map((player) => (
           <li key={player?.id}>{player?.email}</li>
         ))}
+        <li className="flex items-center gap-2">
+          <Spinner size="sm" />
+          waiting for players
+        </li>
       </ul>
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
         !lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && (
-          <button
-            className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            type="button"
-            onClick={joinLobby}
-          >
-            Join!
-          </button>
-        )}
+        ) && <Button onClick={joinLobby}>Join!</Button>}
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
         lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && (
-          <button
-            className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            type="button"
-            onClick={leaveLobby}
-          >
-            Leave!
-          </button>
-        )}
+        ) && <Button onClick={leaveLobby}>Leave!</Button>}
       {lobby?.host?.id === props.loggedInUser?.id && (
-        <button
-          className="w-48 flex-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-indigo-50 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          type="button"
-          onClick={startGame}
-        >
-          Play!
-        </button>
+        <Button onClick={startGame}>Play!</Button>
       )}
     </div>
   );

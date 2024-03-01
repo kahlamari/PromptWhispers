@@ -1,8 +1,17 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useState,
+} from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Turn } from "../types/Turn.ts";
 import { Round } from "../types/Round.ts";
+import Button from "../ui-components/Button.tsx";
+import Spinner from "../ui-components/Spinner.tsx";
+import ImagePlaceholder from "../ui-components/ImagePlaceholder.tsx";
 
 export default function Play() {
   const params = useParams();
@@ -13,6 +22,8 @@ export default function Play() {
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [shouldPoll, setShouldPoll] = useState<boolean>(true);
   const [isGameRunning, setIsGameRunning] = useState<boolean>(true);
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const onPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -30,6 +41,14 @@ export default function Play() {
         setRound(response.data);
         requestImageGeneration();
       });
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      setInputDisabled(true);
+      submitPrompt(event as unknown as FormEvent<HTMLFormElement>);
+    }
   };
 
   const requestImageGeneration = () => {
@@ -55,7 +74,6 @@ export default function Play() {
     }
     return undefined;
   };
-
   const isGameFinished = (): boolean => {
     return round?.gameState === "FINISHED";
   };
@@ -96,54 +114,70 @@ export default function Play() {
           setIsGameRunning(false);
         }
       } else {
+        setIsImageLoaded(false);
         setShouldPoll(true);
       }
     }
   }, [round]);
 
-  if (round == undefined) {
-    return <div>Loading</div>;
+  if (!round) {
+    return (
+      <div className="sm:h-144 flex h-96 items-center">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   return (
-    <div className="mt-5 flex flex-col items-center">
+    <div className="sm:w-144 flex h-full w-full flex-col items-center gap-y-3 sm:gap-y-5">
       {getLastImage() && (
         <img
-          className="h-128 w-auto rounded-2xl"
+          className={`w-svw rounded-2xl  ${isImageLoaded ? "block" : "hidden"}`}
           alt="generated based on previous prompt"
           src={getLastImage()?.content}
+          onLoad={() => setIsImageLoaded(true)}
         />
       )}
+      {!isImageLoaded && round.turns.length >= 1 && (
+        <div className="sm:w-144 aspect-square w-full items-center">
+          <ImagePlaceholder />
+        </div>
+      )}
+      {!isImageLoaded && round.turns.length < 1 && (
+        <div className="sm:h-144 aspect-square h-96"></div>
+      )}
       {!isGameFinished() && (
-        <div className="mt-5">
-          <form onSubmit={submitPrompt} className="flex">
+        <div className="w-full items-center">
+          <form
+            onSubmit={submitPrompt}
+            className="flex w-full flex-col gap-y-3 sm:flex-row sm:gap-x-5"
+          >
             <textarea
+              className="h-full w-full resize-none overflow-hidden rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
               value={prompt}
               onChange={onPromptChange}
+              onKeyDown={handleKeyDown}
               rows={2}
               placeholder="Enter your prompt!"
               autoFocus={true}
               disabled={inputDisabled}
-              className="mr-4 h-full w-auto resize-none rounded-2xl p-6 text-3xl text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:opacity-75"
+              maxLength={140}
             />
-            <button
-              type="submit"
-              disabled={inputDisabled}
-              className="w-auto justify-center rounded-2xl bg-indigo-600 px-10 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-75"
-            >
-              Done
-            </button>
+            <Button type="submit" isDisabled={inputDisabled}>
+              {!getLastImage() && round.turns.length >= 1 ? (
+                <Spinner size="md" />
+              ) : (
+                "Done"
+              )}
+            </Button>
           </form>
         </div>
       )}
       {isGameFinished() && (
         <div className="flex flex-col items-center">
-          <Link
-            to={`/games/${gameId}`}
-            className="w-auto justify-center rounded-2xl bg-indigo-600 px-16 py-6 text-3xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
+          <Button onClick={() => navigate(`/games/${gameId}`)}>
             View all turns!
-          </Link>
+          </Button>
         </div>
       )}
     </div>

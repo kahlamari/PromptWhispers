@@ -27,9 +27,9 @@ function App() {
   };
 
   return (
-    <>
+    <div className="bg-indigo-50">
       <Header user={user} logout={logout} />
-      <div className="flex min-h-screen items-center justify-center bg-indigo-50">
+      <div className="flex h-svh justify-center gap-y-3 bg-indigo-50 p-3 text-lg xs:text-base sm:p-5">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId/" element={<Play />} />
@@ -41,7 +41,7 @@ function App() {
           <Route path="/games/:gameId/" element={<GameReplay />} />
         </Routes>
       </div>
-    </>
+    </div>
   );
 }
 
