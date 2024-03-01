@@ -55,17 +55,26 @@ export default function LobbyScreen(props: LobbyScreenProps) {
     }
   }, [lobby, navigate]);
 
+  const copyCurrentUrlToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      console.log("URL copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
+  };
+
   if (!lobby) {
     return (
-      <div className="sm:h-144 flex h-96 items-center">
+      <div className="flex h-96 items-center sm:h-144">
         <Spinner size="xl" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-y-3 sm:gap-y-5">
-      <ul className="sm:min-h-144 flex min-h-96 flex-col items-center justify-center divide-y divide-indigo-200 text-lg font-light">
+    <div className="flex w-full flex-col items-center gap-y-3 sm:w-144 sm:gap-y-5">
+      <ul className="flex min-h-96 flex-col items-center justify-center divide-y divide-indigo-200 text-lg font-light sm:min-h-144">
         {lobby?.players.map((player) => (
           <li key={player?.id}>{player?.email}</li>
         ))}
@@ -78,14 +87,34 @@ export default function LobbyScreen(props: LobbyScreenProps) {
         lobby?.host?.id !== props.loggedInUser?.id &&
         !lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && <Button onClick={joinLobby}>Join!</Button>}
+        ) && <Button onClick={joinLobby}>Join</Button>}
       {props.loggedInUser &&
         lobby?.host?.id !== props.loggedInUser?.id &&
         lobby?.players.some(
           (player) => player?.id === props.loggedInUser?.id,
-        ) && <Button onClick={leaveLobby}>Leave!</Button>}
+        ) && <Button onClick={leaveLobby}>Leave</Button>}
       {lobby?.host?.id === props.loggedInUser?.id && (
-        <Button onClick={startGame}>Play!</Button>
+        <div className="flex w-full flex-col items-center justify-between gap-y-3 sm:flex-row sm:justify-between sm:gap-x-5">
+          <div className="w-full">
+            <Button onClick={startGame}>Play</Button>
+          </div>
+          <div className="flex w-full flex-row flex-nowrap justify-center">
+            <Button onClick={copyCurrentUrlToClipboard}>
+              Invite
+              <span id="default-icon">
+                <svg
+                  className="h-8 w-8"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 18 20"
+                >
+                  <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z" />
+                </svg>
+              </span>
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

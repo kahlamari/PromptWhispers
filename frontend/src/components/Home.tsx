@@ -27,7 +27,7 @@ export default function Home() {
   };
 
   return (
-    <div className="sm:w-144 flex h-full w-full flex-col items-center gap-y-3 sm:gap-y-5">
+    <div className="flex h-full w-full flex-col items-center gap-y-3 sm:w-144 sm:gap-y-5">
       <img
         className="w-svw rounded-2xl"
         alt="get players excited"
@@ -35,7 +35,7 @@ export default function Home() {
       />
       <div className="flex w-full flex-col gap-y-3 sm:flex-row sm:justify-between sm:gap-x-5">
         <Button onClick={startGame}>Play Solo</Button>
-        <Button onClick={startLobby}>Play Multiplayer</Button>
+        <Button onClick={startLobby}>Multiplayer</Button>
       </div>
     </div>
   );

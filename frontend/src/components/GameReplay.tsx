@@ -102,13 +102,13 @@ export default function GameReplay() {
                               }
                             </span>
                           </div>
-                          <p className="text-3xl font-normal text-gray-900">
-                            {isLoading && index === visibleCount - 1 ? (
-                              <Spinner size="md" />
-                            ) : (
-                              turn.content
-                            )}
-                          </p>
+                          {isLoading && index === visibleCount - 1 ? (
+                            <Spinner size="md" />
+                          ) : (
+                            <p className="text-3xl font-normal text-gray-900">
+                              {turn.content}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
