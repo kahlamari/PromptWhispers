@@ -158,7 +158,11 @@ export default function Play() {
               onChange={onPromptChange}
               onKeyDown={handleKeyDown}
               rows={2}
-              placeholder="Enter your prompt!"
+              placeholder={
+                round.turns.length < 1
+                  ? "Enter your prompt!"
+                  : "Describe the image!"
+              }
               autoFocus={true}
               disabled={inputDisabled}
               maxLength={140}
