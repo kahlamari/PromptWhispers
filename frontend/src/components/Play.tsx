@@ -167,13 +167,15 @@ export default function Play() {
               disabled={inputDisabled}
               maxLength={140}
             />
-            <Button type="submit" isDisabled={inputDisabled}>
-              {!getLastImage() && round.turns.length >= 1 ? (
-                <Spinner size="md" />
-              ) : (
-                "Done"
-              )}
-            </Button>
+            <div className="parent flex items-stretch ">
+              <Button type="submit" isDisabled={inputDisabled}>
+                {!getLastImage() && round.turns.length >= 1 ? (
+                  <Spinner size="md" />
+                ) : (
+                  "Done"
+                )}
+              </Button>
+            </div>
           </form>
         </div>
       )}

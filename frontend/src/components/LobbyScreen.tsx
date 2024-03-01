@@ -55,6 +55,15 @@ export default function LobbyScreen(props: LobbyScreenProps) {
     }
   }, [lobby, navigate]);
 
+  const copyCurrentUrlToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      console.log("URL copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
+  };
+
   if (!lobby) {
     return (
       <div className="flex h-96 items-center sm:h-144">
@@ -90,11 +99,7 @@ export default function LobbyScreen(props: LobbyScreenProps) {
             <Button onClick={startGame}>Play</Button>
           </div>
           <div className="flex w-full flex-row flex-nowrap justify-center">
-            <Button
-              onClick={() => {
-                return;
-              }}
-            >
+            <Button onClick={copyCurrentUrlToClipboard}>
               Invite
               <span id="default-icon">
                 <svg
