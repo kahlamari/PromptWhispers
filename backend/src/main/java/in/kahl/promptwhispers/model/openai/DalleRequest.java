@@ -7,10 +7,10 @@ public record DalleRequest(
         String size
 ) {
     public DalleRequest(String model, String prompt) {
-        this(model, prompt, 1, "1024x1024");
+        this(model, prompt, 1, "512x512");
     }
 
     public DalleRequest(String prompt) {
-        this("dall-e-3", prompt);
+        this("dall-e-2", prompt);
     }
 }
