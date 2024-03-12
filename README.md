@@ -5,5 +5,5 @@ Prompt Whispers offers a creative spin on the classic game of Telephone (known a
 
 ## See it in action
 A short recording of three players having fun. 
-https://github.com/kahlamari/PromptWhispers/assets/1410329/2bb1c622-1501-4bd0-baea-0dd0aa421abd
+<video src="https://github.com/kahlamari/PromptWhispers/assets/1410329/2bb1c622-1501-4bd0-baea-0dd0aa421abd" width="834" />
 
