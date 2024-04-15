@@ -12,7 +12,7 @@ public class DalleService {
     private final RestClient restClient;
 
     @Value("${app.openai.api.active}")
-    private String openaiApiActive;
+    private boolean openaiApiActive;
 
 
     public DalleService(@Value("${app.dalle.api.url}") String url,
@@ -26,18 +26,22 @@ public class DalleService {
     }
 
     public String getGeneratedImageUrl(String prompt) {
-        DalleResponse response = restClient.post()
-                .uri("/generations")
-                .body(new DalleRequest(prompt))
-                .contentType(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .body(DalleResponse.class);
+        if (openaiApiActive) {
+            DalleResponse response = restClient.post()
+                    .uri("/generations")
+                    .body(new DalleRequest(prompt))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .body(DalleResponse.class);
 
+            if (response == null) {
+                return "https://res.cloudinary.com/magikahl/image/upload/v1709290580/promptwhispers_test/e96b0834-de38-4fdf-8d64-0122109ae643.png";
+            }
 
-        if (response == null) {
-            return "https://image.png";
+            return response.data().getFirst().url();
+        } else {
+            return "https://res.cloudinary.com/magikahl/image/upload/v1709290580/promptwhispers_test/e96b0834-de38-4fdf-8d64-0122109ae643.png";
         }
 
-        return response.data().getFirst().url();
     }
 }
