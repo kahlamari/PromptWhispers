@@ -11,6 +11,10 @@ import org.springframework.web.client.RestClient;
 public class DalleService {
     private final RestClient restClient;
 
+    @Value("${app.openai.api.active}")
+    private String openaiApiActive;
+
+
     public DalleService(@Value("${app.dalle.api.url}") String url,
                         @Value("${app.openai.api.key}") String key,
                         @Value("${app.openai.api.org}") String org) {
