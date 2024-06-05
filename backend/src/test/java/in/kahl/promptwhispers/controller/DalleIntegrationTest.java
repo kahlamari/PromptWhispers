@@ -3,11 +3,7 @@ package in.kahl.promptwhispers.controller;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import in.kahl.promptwhispers.model.GameState;
-import in.kahl.promptwhispers.model.Lobby;
-import in.kahl.promptwhispers.model.Turn;
-import in.kahl.promptwhispers.model.User;
-import in.kahl.promptwhispers.model.dto.RoundResponse;
+import in.kahl.promptwhispers.model.*;
 import in.kahl.promptwhispers.repo.UserRepo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -102,9 +98,9 @@ public class DalleIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
+        Game game = objectMapper.readValue(saveResult, Game.class);
 
-        saveResult = mockMvc.perform(post("/api/games/" + game.gameId() + "/prompt")
+        saveResult = mockMvc.perform(post("/api/games/" + game.id() + "/prompt")
                 .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                 .content("""
@@ -114,7 +110,7 @@ public class DalleIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        game = objectMapper.readValue(saveResult, RoundResponse.class);
+        game = objectMapper.readValue(saveResult, Game.class);
 
         mockWebServer.enqueue(new MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -136,22 +132,23 @@ public class DalleIntegrationTest {
         when(cloudinary.uploader().upload(anyString(), anyMap())).thenReturn(mockResponse);
 
         // ACT
-        String resultJSON = mockMvc.perform(post("/api/games/" + game.gameId() + "/generateImage")
+        String resultJSON = mockMvc.perform(post("/api/games/" + game.id() + "/generateImage")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", "user@example.com"))))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.gameId").isNotEmpty())
-                .andExpect(jsonPath("$.turns").isNotEmpty())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.rounds").isArray())
+                .andExpect(jsonPath("$.rounds[0]").isNotEmpty())
                 .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse gameActual = objectMapper.readValue(resultJSON, RoundResponse.class);
-        Turn imageTurn = gameActual.turns().getLast();
+        Game gameActual = objectMapper.readValue(resultJSON, Game.class);
+        Turn imageTurn = gameActual.rounds().getFirst().getLast();
 
-        assertEquals(game.gameId(), gameActual.gameId());
+        assertEquals(game.id(), gameActual.id());
         assertEquals(imageUrl, imageTurn.content());
         assertTrue(Instant.now().minusSeconds(10L).isBefore(imageTurn.createdAt()));
     }
