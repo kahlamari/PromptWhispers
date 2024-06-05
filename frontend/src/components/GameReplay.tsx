@@ -1,9 +1,9 @@
 import axios from "axios";
-import { Game } from "../types/Game.ts";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Turn } from "../types/Turn.ts";
-import { User } from "../types/User.ts";
+import {Game} from "../types/Game.ts";
+import {useEffect, useState} from "react";
+import {useParams} from "react-router-dom";
+import {Turn} from "../types/Turn.ts";
+import {User} from "../types/User.ts";
 import Spinner from "../ui-components/Spinner.tsx";
 import ImagePlaceholder from "../ui-components/ImagePlaceholder.tsx";
 
@@ -25,7 +25,7 @@ export default function GameReplay() {
 
   useEffect(() => {
     if (gameId) {
-      axios.get<Game>(`/api/games/${gameId}/all`).then((response) => {
+      axios.get<Game>(`/api/games/${gameId}`).then((response) => {
         setGame(response.data);
       });
     }
