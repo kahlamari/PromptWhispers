@@ -2,7 +2,6 @@ package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.*;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
-import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -33,7 +32,7 @@ public class GameService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public RoundResponse createGame(OAuth2User principal, Lobby lobby) {
+    public Game createGame(OAuth2User principal, Lobby lobby) {
         User user = userService.getLoggedInUser(principal);
         User host = userService.getUserById(lobby.host().id());
         if (!user.equals(host)) {
@@ -51,13 +50,13 @@ public class GameService {
         newGame = gameRepo.save(newGame.withGameState(GameState.REQUEST_NEW_PROMPTS));
         lobbyService.update(lobby.withGameId(newGame.id()));
 
-        return newGame.asRoundResponse(user);
+        return newGame;
     }
 
-    public RoundResponse getGameById(OAuth2User principal, String id) {
+    public Game getGameById(OAuth2User principal, String id) {
         User user = userService.getLoggedInUser(principal);
 
-        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new).asRoundResponse(user);
+        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
     public Game getGameAllById(String id) {
@@ -88,17 +87,17 @@ public class GameService {
         }
     }
 
-    public RoundResponse submitPrompt(OAuth2User principal, String gameId, PromptCreate promptCreate) {
+    public Game submitPrompt(OAuth2User principal, String gameId, PromptCreate promptCreate) {
         User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
         Turn newPrompt = promptCreate.asNewPromptTurn(user);
         Game gameWithPrompt = game.withTurn(newPrompt);
 
-        return gameRepo.save(gameWithPrompt).asRoundResponse(user);
+        return gameRepo.save(gameWithPrompt);
     }
 
-    public RoundResponse generateImage(OAuth2User principal, String gameId) {
+    public Game generateImage(OAuth2User principal, String gameId) {
         User user = userService.getLoggedInUser(principal);
         Game game = gameRepo.findById(gameId).orElseThrow(NoSuchElementException::new);
 
@@ -112,6 +111,6 @@ public class GameService {
         Turn generatedImage = new Turn(user, TurnType.IMAGE, imageUrl);
         Game gameWithImage = game.withTurn(generatedImage);
 
-        return gameRepo.save(gameWithImage).asRoundResponse(user);
+        return gameRepo.save(gameWithImage);
     }
 }

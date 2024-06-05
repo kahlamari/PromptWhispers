@@ -59,8 +59,9 @@ class GameIntegrationTest {
                         .content(lobbyAsJSON))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.gameId").isNotEmpty())
-                .andExpect(jsonPath("$.turns").isEmpty())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.rounds").isArray())
+                .andExpect(jsonPath("$.rounds", is(List.of(List.of()))))
                 .andExpect(jsonPath("$.gameState", is(GameState.REQUEST_NEW_PROMPTS.toString())));
     }
 
