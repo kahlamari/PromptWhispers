@@ -2,7 +2,6 @@ package in.kahl.promptwhispers.service;
 
 import in.kahl.promptwhispers.model.*;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
-import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.GameRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class GameServiceTest {
     }
 
     @Test
-    void createGameTest_whenGameCreationRequested_thenReturnNewRoundResponse() {
+    void createGameTest_whenGameCreationRequested_thenReturnNewGame() {
         // ARRANGE
         Instant time = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID mockUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -64,10 +63,10 @@ class GameServiceTest {
             when(gameRepo.save(expected)).thenReturn(expected);
 
             // ACT
-            RoundResponse actual = serviceUnderTest.createGame(mockedPrincipal, testLobby);
+            Game actual = serviceUnderTest.createGame(mockedPrincipal, testLobby);
 
             // ASSERT
-            assertEquals(expected.asRoundResponse(testUser), actual);
+            assertEquals(expected, actual);
             verify(gameRepo).save(expected);
             verifyNoMoreInteractions(gameRepo);
         }
@@ -76,18 +75,14 @@ class GameServiceTest {
     @Test
     void getGameByIdTest_whenGameExists_thenReturnGame() {
         // ARRANGE
-        OAuth2User mockedPrincipal = mock(OAuth2User.class);
-        User testUser = new User(userEmail);
-        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
-
         Optional<Game> expectedGame = Optional.of(createEmptyGame());
         when(gameRepo.findById(expectedGame.get().id())).thenReturn(expectedGame);
 
         // ACT
-        RoundResponse actualGame = serviceUnderTest.getGameById(mockedPrincipal, expectedGame.get().id());
+        Game actualGame = serviceUnderTest.getGameById(expectedGame.get().id());
 
         // ASSERT
-        assertEquals(expectedGame.get().asRoundResponse(testUser), actualGame);
+        assertEquals(expectedGame.get(), actualGame);
         verify(gameRepo).findById(expectedGame.get().id());
         verifyNoMoreInteractions(gameRepo);
     }
@@ -95,15 +90,11 @@ class GameServiceTest {
     @Test
     void getGameByIdTest_whenGameNotExists_thenThrowException() {
         // ARRANGE
-        OAuth2User mockedPrincipal = mock(OAuth2User.class);
-        User testUser = new User(userEmail);
-        when(userService.getLoggedInUser(mockedPrincipal)).thenReturn(testUser);
-
         Optional<Game> testData = Optional.empty();
         when(gameRepo.findById("N/A")).thenReturn(testData);
 
         // ACT
-        Executable executable = () -> serviceUnderTest.getGameById(mockedPrincipal, "1");
+        Executable executable = () -> serviceUnderTest.getGameById("1");
 
         // ASSERT
         assertThrows(NoSuchElementException.class, executable);
@@ -194,10 +185,10 @@ class GameServiceTest {
             PromptCreate userProvidedPrompt = new PromptCreate(promptInput);
 
             // ACT
-            RoundResponse actualRoundWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
+            Game actualGameWithPrompt = serviceUnderTest.submitPrompt(mockedPrincipal, gameId, userProvidedPrompt);
 
             // ASSERT
-            assertEquals(gameWithPrompt.get().asRoundResponse(testUser), actualRoundWithPrompt);
+            assertEquals(gameWithPrompt.get(), actualGameWithPrompt);
             verify(userService).getLoggedInUser(mockedPrincipal);
             verifyNoMoreInteractions(userService);
 
@@ -243,10 +234,10 @@ class GameServiceTest {
             when(gameRepo.save(any(Game.class))).thenReturn(gameWithImageUrl);
 
             // ACT
-            RoundResponse roundResponseActual = serviceUnderTest.generateImage(mockedPrincipal, gameId);
+            Game gameActual = serviceUnderTest.generateImage(mockedPrincipal, gameId);
 
             // ASSERT
-            assertEquals(gameWithImageUrl.asRoundResponse(testUser), roundResponseActual);
+            assertEquals(gameWithImageUrl, gameActual);
             verify(gameRepo, times(2)).findById(gameId);
             verify(gameRepo).save(gameWithImageUrl);
             verifyNoMoreInteractions(gameRepo);
