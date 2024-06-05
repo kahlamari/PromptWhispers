@@ -57,11 +57,6 @@ public class GameService {
         return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
-    public Game getGameAllById(String id) {
-
-        return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
-    }
-
     public List<Game> getGamesByUser(OAuth2User principal) {
         User user = userService.getLoggedInUser(principal);
         List<String> gameIds = userService.getAllGameIds(user.id());
