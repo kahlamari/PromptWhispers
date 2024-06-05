@@ -1,6 +1,5 @@
 package in.kahl.promptwhispers.model;
 
-import in.kahl.promptwhispers.model.dto.RoundResponse;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
@@ -24,18 +23,6 @@ public record Game(
                 new ArrayList<>(new ArrayList<>()),
                 GameState.NEW,
                 Instant.now().truncatedTo(ChronoUnit.MILLIS));
-    }
-
-    public RoundResponse asRoundResponse(User player) {
-        int playerIndex = players().indexOf(player);
-        int imageTurns = getNumOfCompletedImageTurns();
-
-        int roundOfPlayer = (playerIndex + imageTurns) % players().size();
-
-        return new RoundResponse(
-                id(),
-                rounds().isEmpty() ? Collections.emptyList() : rounds().get(roundOfPlayer),
-                gameState());
     }
 
     public Game withPlayer(User player) {
