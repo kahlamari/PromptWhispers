@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
@@ -257,7 +256,7 @@ class GameIntegrationTest {
         String gameId = JsonPath.parse(saveResult).read("$.id");
 
         // ACT
-        MvcResult result = mockMvc.perform(post("/api/games/" + gameId + "/prompt")
+        mockMvc.perform(post("/api/games/" + gameId + "/prompt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                         .content("""
@@ -268,7 +267,6 @@ class GameIntegrationTest {
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.rounds").isArray())
                 .andExpect(jsonPath("$.rounds[0]").isNotEmpty())
-                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())))
-                .andReturn();
+                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())));
     }
 }
