@@ -53,9 +53,7 @@ public class GameService {
         return newGame;
     }
 
-    public Game getGameById(OAuth2User principal, String id) {
-        User user = userService.getLoggedInUser(principal);
-
+    public Game getGameById(String id) {
         return gameRepo.findById(id).orElseThrow(NoSuchElementException::new);
     }
 

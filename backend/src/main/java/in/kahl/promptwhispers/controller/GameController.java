@@ -29,8 +29,8 @@ public class GameController {
     }
 
     @GetMapping("{gameId}")
-    public Game getGame(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
-        return gameService.getGameById(principal, gameId);
+    public Game getGame(@PathVariable String gameId) {
+        return gameService.getGameById(gameId);
     }
 
     @GetMapping("{gameId}/all")
