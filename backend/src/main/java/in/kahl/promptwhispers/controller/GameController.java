@@ -4,7 +4,6 @@ import in.kahl.promptwhispers.model.ErrorMessage;
 import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.dto.PromptCreate;
-import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,18 +24,13 @@ public class GameController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundResponse createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
+    public Game createGame(@AuthenticationPrincipal OAuth2User principal, @RequestBody Lobby lobby) {
         return gameService.createGame(principal, lobby);
     }
 
     @GetMapping("{gameId}")
-    public RoundResponse getGame(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
-        return gameService.getGameById(principal, gameId);
-    }
-
-    @GetMapping("{gameId}/all")
-    public Game getGameAll(@PathVariable String gameId) {
-        return gameService.getGameAllById(gameId);
+    public Game getGame(@PathVariable String gameId) {
+        return gameService.getGameById(gameId);
     }
 
     @GetMapping()
@@ -52,13 +46,13 @@ public class GameController {
 
     @PostMapping("{gameId}/prompt")
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundResponse submitPrompt(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId, @RequestBody PromptCreate prompt) {
+    public Game submitPrompt(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId, @RequestBody PromptCreate prompt) {
         return gameService.submitPrompt(principal, gameId, prompt);
     }
 
     @PostMapping("{gameId}/generateImage")
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundResponse generateImage(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
+    public Game generateImage(@AuthenticationPrincipal OAuth2User principal, @PathVariable String gameId) {
         return gameService.generateImage(principal, gameId);
     }
 

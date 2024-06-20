@@ -1,8 +1,8 @@
-import { Route, Routes } from "react-router-dom";
+import {Route, Routes} from "react-router-dom";
 import Home from "./components/Home.tsx";
 import Play from "./components/Play.tsx";
-import { useEffect, useState } from "react";
-import { User } from "./types/User.ts";
+import {useEffect, useState} from "react";
+import {User} from "./types/User.ts";
 import axios from "axios";
 import Header from "./components/Header.tsx";
 import GameHistory from "./components/GameHistory.tsx";
@@ -32,7 +32,7 @@ function App() {
       <div className="flex h-svh justify-center gap-y-3 p-3 text-lg xs:text-base sm:p-5">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/play/:gameId/" element={<Play />} />
+          <Route path="/play/:gameId/" element={<Play loggedInUser={user}/>}/>
           <Route
             path="/lobby/:lobbyId/"
             element={<LobbyScreen loggedInUser={user} />}

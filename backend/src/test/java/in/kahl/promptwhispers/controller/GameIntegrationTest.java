@@ -7,7 +7,6 @@ import in.kahl.promptwhispers.model.Game;
 import in.kahl.promptwhispers.model.GameState;
 import in.kahl.promptwhispers.model.Lobby;
 import in.kahl.promptwhispers.model.User;
-import in.kahl.promptwhispers.model.dto.RoundResponse;
 import in.kahl.promptwhispers.repo.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
@@ -59,8 +57,9 @@ class GameIntegrationTest {
                         .content(lobbyAsJSON))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.gameId").isNotEmpty())
-                .andExpect(jsonPath("$.turns").isEmpty())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.rounds").isArray())
+                .andExpect(jsonPath("$.rounds[0]").isEmpty())
                 .andExpect(jsonPath("$.gameState", is(GameState.REQUEST_NEW_PROMPTS.toString())));
     }
 
@@ -80,25 +79,26 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse gameExpected = objectMapper.readValue(saveArrangeResult, RoundResponse.class);
+        Game gameExpected = objectMapper.readValue(saveArrangeResult, Game.class);
 
         // ACT
-        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.gameId())
+        String saveResult = mockMvc.perform(get("/api/games/" + gameExpected.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
 
                 // ASSERT
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.gameId").isNotEmpty())
-                .andExpect(jsonPath("$.turns").isEmpty())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.rounds").isArray())
+                .andExpect(jsonPath("$.rounds[0]").isEmpty())
                 .andExpect(jsonPath("$.gameState", is(GameState.REQUEST_NEW_PROMPTS.toString())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse game = objectMapper.readValue(saveResult, RoundResponse.class);
-        assertEquals(gameExpected.gameId(), game.gameId());
-        assertEquals(gameExpected.turns(), game.turns());
+        Game game = objectMapper.readValue(saveResult, Game.class);
+        assertEquals(gameExpected.id(), game.id());
+        assertEquals(gameExpected.rounds(), game.rounds());
         assertEquals(gameExpected.gameState(), game.gameState());
     }
 
@@ -137,7 +137,7 @@ class GameIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
 
         String game2Result = mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse game2 = objectMapper.readValue(game2Result, RoundResponse.class);
+        Game game2 = objectMapper.readValue(game2Result, Game.class);
 
         // ACT
         String gameListResult = mockMvc.perform(get("/api/games")
@@ -166,7 +166,7 @@ class GameIntegrationTest {
 
         List<String> gameIdListActual = gameListActual.stream().map(Game::id).toList();
 
-        assertEquals(List.of(game1.gameId(), game2.gameId()), gameIdListActual);
+        assertEquals(List.of(game1.id(), game2.id()), gameIdListActual);
     }
 
     @Test
@@ -185,10 +185,10 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
 
         // ACT
-        mockMvc.perform(delete("/api/games/" + game1.gameId())
+        mockMvc.perform(delete("/api/games/" + game1.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail))))
 
@@ -218,13 +218,13 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        RoundResponse game1 = objectMapper.readValue(game1Result, RoundResponse.class);
+        Game game1 = objectMapper.readValue(game1Result, Game.class);
 
         User userWithoutGame = new User("2" + userEmail);
         userRepo.save(userWithoutGame);
 
         // ACT
-        mockMvc.perform(delete("/api/games/" + game1.gameId())
+        mockMvc.perform(delete("/api/games/" + game1.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userWithoutGame.email()))))
 
@@ -253,10 +253,10 @@ class GameIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String gameId = JsonPath.parse(saveResult).read("$.gameId");
+        String gameId = JsonPath.parse(saveResult).read("$.id");
 
         // ACT
-        MvcResult result = mockMvc.perform(post("/api/games/" + gameId + "/prompt")
+        mockMvc.perform(post("/api/games/" + gameId + "/prompt")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(oidcLogin().userInfoToken(token -> token.claim("email", userEmail)))
                         .content("""
@@ -264,9 +264,9 @@ class GameIntegrationTest {
                                 """))
                 // ASSERT
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.gameId").isNotEmpty())
-                .andExpect(jsonPath("$.turns").isNotEmpty())
-                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())))
-                .andReturn();
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.rounds").isArray())
+                .andExpect(jsonPath("$.rounds[0]").isNotEmpty())
+                .andExpect(jsonPath("$.gameState", is(GameState.WAIT_FOR_PROMPTS.toString())));
     }
 }

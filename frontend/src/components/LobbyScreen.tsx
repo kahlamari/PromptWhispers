@@ -1,11 +1,11 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {useEffect, useState} from "react";
 import axios from "axios";
-import { Lobby } from "../types/Lobby.ts";
-import { User } from "../types/User.ts";
-import { Round } from "../types/Round.ts";
+import {Lobby} from "../types/Lobby.ts";
+import {User} from "../types/User.ts";
 import Spinner from "../ui-components/Spinner.tsx";
 import Button from "../ui-components/Button.tsx";
+import {Game} from "../types/Game.ts";
 
 type LobbyScreenProps = {
   readonly loggedInUser: User;
@@ -33,8 +33,8 @@ export default function LobbyScreen(props: LobbyScreenProps) {
 
   const startGame = () => {
     axios
-      .post<Round>(`/api/games`, lobby)
-      .then((response) => navigate(`/play/${response.data.gameId}`));
+        .post<Game>(`/api/games`, lobby)
+        .then((response) => navigate(`/play/${response.data.id}`));
   };
 
   useEffect(() => {
